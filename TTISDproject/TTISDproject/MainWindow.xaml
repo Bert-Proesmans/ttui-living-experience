@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TTISDproject"
         mc:Ignorable="d"
-        KeyUp="Window_KeyUp"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Living room experience" Height="450" Width="800"
+        Loaded="WindowLoaded" Closing="WindowClosing">
 
     <Window.Resources>
         <SolidColorBrush x:Key="MediumGreyBrush" Color="#ff6e6e6e"/>

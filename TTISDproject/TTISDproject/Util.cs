@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Windows.Media.Media3D;
 
-namespace Microsoft.Samples.Kinect.ControlsBasics
+namespace TTISDproject
 {
     public static class Util
     {
 
-        public static Matrix3D make_align_axis_matrix(Vector3D initialAxis, Vector3D alignWithAxis)
+        public static Matrix3D Make_align_axis_matrix(Vector3D initialAxis, Vector3D alignWithAxis)
         {
             initialAxis.Normalize();
             alignWithAxis.Normalize();
@@ -17,18 +17,18 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
             double axisDot = Vector3D.DotProduct(initialAxis, alignWithAxis);
             Vector3D axisCross = Vector3D.CrossProduct(initialAxis, alignWithAxis);
 
-            if (sqrlenv3(axisCross) > float_epsilon())
+            if (Sqrlenv3(axisCross) > float_epsilon())
             {
                 axisCross.Normalize();
                 double fAngle = Math.Acos(axisDot);
-                return make_axis_angle_matrix(axisCross, fAngle);
+                return Make_axis_angle_matrix(axisCross, fAngle);
             }
             else if (axisDot < 0)
             {
                 Vector3D perp1 = new Vector3D();
                 Vector3D perp2 = new Vector3D();
-                make_perp_vectors(initialAxis, ref perp1, ref perp2);
-                return make_axis_angle_matrix(perp1, 3.14159265);
+                Make_perp_vectors(initialAxis, ref perp1, ref perp2);
+                return Make_axis_angle_matrix(perp1, 3.14159265);
             }
             else
             {
@@ -36,7 +36,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
             }
         }
 
-        public static double sqrlenv3(Vector3D a)
+        public static double Sqrlenv3(Vector3D a)
         {
             //compute squared length of 3-vector
             return a.X * a.X + a.Y * a.Y + a.Z * a.Z;
@@ -47,7 +47,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
             return 0.000000119;
         }
 
-        public static void make_perp_vectors(Vector3D a, ref Vector3D out1, ref Vector3D out2)
+        public static void Make_perp_vectors(Vector3D a, ref Vector3D out1, ref Vector3D out2)
         {
             //construct two perpendicular vectors to input vector, return as a pair of 3-tuples
             if (Math.Abs(a.X) > Math.Abs(a.Y) && Math.Abs(a.X) > Math.Abs(a.Z))
@@ -59,7 +59,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
             out2 = Vector3D.CrossProduct(a, out1);
         }
 
-        public static Matrix3D make_axis_angle_matrix(Vector3D axis, double angle)
+        public static Matrix3D Make_axis_angle_matrix(Vector3D axis, double angle)
         {
             //construct a matrix that rotates around axis by angle (in radians)
             double fCos = Math.Cos(angle);

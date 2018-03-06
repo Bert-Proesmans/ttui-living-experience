@@ -48,6 +48,26 @@ namespace TTISDproject
         private readonly Brush centerPointBrush = Brushes.Blue;
 
         /// <summary>
+        /// TopLeft corner of our 2D drawing scene
+        /// </summary>
+        private readonly Point Point2DStepOne = new Point(0, 0);
+
+        /// <summary>
+        /// TopRight corner of our 2D drawing scene
+        /// </summary>
+        private readonly Point Point2DStepTwo = new Point(200, 0);
+
+        /// <summary>
+        /// BottomLeft corner of our 2D drawing scene
+        /// </summary>
+        private readonly Point Point2DStepThree = new Point(0, 200);
+
+        /// <summary>
+        /// BottomRight corner of our 2D drawing scene
+        /// </summary>
+        private readonly Point Point2DStepFour = new Point(200, 200);
+
+        /// <summary>
         /// Active Kinect sensor
         /// </summary>
         private KinectSensor sensor;
@@ -74,11 +94,17 @@ namespace TTISDproject
                 return calibrationStep;
             }
 
-            set { 
+            set
+            {
                 calibrationStep = value;
                 RaisePropertyChanged(nameof(CalibrationStep));
             }
-        }      
+        }
+
+        /// <summary>
+        /// Instance used to calibrate 3D to 2D mapping
+        /// </summary>
+        private CalibrationClass calibrationClass = null;
 
         /// <summary>
         /// Event handler collector.
@@ -157,6 +183,14 @@ namespace TTISDproject
 
             }
 
+            if (null != this.sensor)
+            {
+                // Setup calibrator to receive mappings between reality and screen image
+                this.calibrationClass = new CalibrationClass(this.sensor);
+                // Listen for key to advance the calibration process.
+                KeyUp += Window_Calibrate;
+            }
+
             if (null == this.sensor)
             {
                 this.statusBarText.Text = Properties.Resources.NoKinectReady;
@@ -225,25 +259,60 @@ namespace TTISDproject
             }
         }
 
-        private void Window_KeyUp(object sender, KeyEventArgs e)
+        private void Window_Calibrate(object sender, KeyEventArgs e)
         {
-            if(e.Key == Key.Space)
+            if (e.Key == Key.Space)
             {
-                switch(calibrationStep)
+                using (SkeletonFrame skeletonFrame = this.sensor.SkeletonStream.OpenNextFrame(200))
                 {
-                    case CalibrationStep.PointOne:
-                        // Lock in point one
-                        break;
-                    case CalibrationStep.PointTwo:
-                        // Lock in point two
-                        break;
-                    case CalibrationStep.PointThree:
-                        // Lock in point three
-                        break;
-                    case CalibrationStep.PointFour:
-                        // Lock in point four
-                    default:
-                        break;
+                    if (skeletonFrame != null)
+                    {
+
+                        if (skeletonFrame.SkeletonArrayLength < 1)
+                        {
+                            // TODO; Notify no skeleton found
+                            return;
+                        }
+                        else if (skeletonFrame.SkeletonArrayLength > 1)
+                        {
+                            // TODO; Notify multiple people in frame
+                            return;
+                        }
+
+                        // Copy skeleton data into managed buffer, this is how it
+                        // should be done..
+                        Skeleton[] skelCalibrator = new Skeleton[1];
+                        skeletonFrame.CopySkeletonDataTo(skelCalibrator);
+                        // Get position of single detected skeleton
+                        SkeletonPoint point3D = skelCalibrator[0].Position;
+
+                        switch (calibrationStep)
+                        {
+                            case CalibrationStep.PointOne:
+                                // Lock in point one
+                                calibrationClass.AddCalibrationPoint(Point2DStepOne, point3D);
+                                CalibrationStep = CalibrationStep.PointTwo;
+                                break;
+                            case CalibrationStep.PointTwo:
+                                // Lock in point two
+                                calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
+                                CalibrationStep = CalibrationStep.PointThree;
+                                break;
+                            case CalibrationStep.PointThree:
+                                // Lock in point three
+                                calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
+                                CalibrationStep = CalibrationStep.PointThree;
+                                break;
+                            case CalibrationStep.PointFour:
+                                // Lock in point four.
+                                // This automatically forces calibration.
+                                calibrationClass.AddCalibrationPoint(Point2DStepFour, point3D);
+                                CalibrationStep = CalibrationStep.Calibrated;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
             }
         }

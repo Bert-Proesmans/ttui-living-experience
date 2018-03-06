@@ -1,13 +1,14 @@
 ﻿using Microsoft.Kinect;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Media.Media3D;
 //shared with students
 
-namespace Microsoft.Samples.Kinect.ControlsBasics
+namespace TTISDproject
 {
     class CalibrationClass
     {
@@ -19,20 +20,40 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
         private Matrix3D m_groundPlaneTransform; //step 2 transform
         private Emgu.CV.Matrix<double> m_transform; //step 3 transform
 
-        public CalibrationClass()
-        {
+        private CalibrationStep m_calibrationStatus = CalibrationStep.NotCalibrated;
 
+        public CalibrationClass(KinectSensor sensor)
+        {
+            m_kinectSensor = sensor;
         }
 
-        private void calibrate()
+        /// <summary>
+        /// Add a new calibration point between an actual 3D position and a 2D position
+        /// on a virtual screen.
+        /// </summary>
+        /// <param name="point2D"></param>
+        /// <param name="point3D"></param>
+        public void AddCalibrationPoint(Point point2D, SkeletonPoint point3D)
         {
-            if (m_skeletonCalibPoints.Count == m_calibPoints.Count)
+            if (m_calibPoints.Count > 4) return;
+
+            this.m_calibPoints.Add(point2D);
+            this.m_skeletonCalibPoints.Add(point3D);
+
+            Calibrate();
+        }
+
+        private void Calibrate()
+        {
+            if (m_skeletonCalibPoints.Count == m_calibPoints.Count
+                // We need at least for points to map a rectangular region.
+                && m_skeletonCalibPoints.Count == 4)
             {
                 //seketon 3D positions --> 3d positions in depth camera
-                Point3D p0 = conertSkeletonPointToDepthPoint(m_skeletonCalibPoints[0]);
-                Point3D p1 = conertSkeletonPointToDepthPoint(m_skeletonCalibPoints[1]);
-                Point3D p2 = conertSkeletonPointToDepthPoint(m_skeletonCalibPoints[2]);
-                Point3D p3 = conertSkeletonPointToDepthPoint(m_skeletonCalibPoints[3]);
+                Point3D p0 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[0]);
+                Point3D p1 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[1]);
+                Point3D p2 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[2]);
+                Point3D p3 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[3]);
 
                 //3d positions depth camera --> positions on a 2D plane
                 Vector3D v1 = p1 - p0;
@@ -45,7 +66,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
                 planeNormalVec.Normalize();
 
                 Vector3D resultingPlaneNormal = new Vector3D(0, 0, 1);
-                m_groundPlaneTransform = Util.make_align_axis_matrix(resultingPlaneNormal, planeNormalVec);
+                m_groundPlaneTransform = Util.Make_align_axis_matrix(resultingPlaneNormal, planeNormalVec);
 
                 Point3D p0OnPlane = m_groundPlaneTransform.Transform(p0);
                 Point3D p1OnPlane = m_groundPlaneTransform.Transform(p1);
@@ -72,22 +93,27 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
 
                 //test to see if resulting perspective transform is correct
                 //tResultx should be same as points in m_calibPoints
-                Point tResult0 = kinectToProjectionPoint(m_skeletonCalibPoints[0]);
-                Point tResult1 = kinectToProjectionPoint(m_skeletonCalibPoints[1]);
-                Point tResult2 = kinectToProjectionPoint(m_skeletonCalibPoints[2]);
-                Point tResult3 = kinectToProjectionPoint(m_skeletonCalibPoints[3]);
+                Point tResult0 = KinectToProjectionPoint(m_skeletonCalibPoints[0]);
+                Point tResult1 = KinectToProjectionPoint(m_skeletonCalibPoints[1]);
+                Point tResult2 = KinectToProjectionPoint(m_skeletonCalibPoints[2]);
+                Point tResult3 = KinectToProjectionPoint(m_skeletonCalibPoints[3]);
+
+                m_calibrationStatus = CalibrationStep.Calibrated;
             }
         }
 
-        private Point3D conertSkeletonPointToDepthPoint(SkeletonPoint skeletonPoint)
+        public Point3D ConertSkeletonPointToDepthPoint(SkeletonPoint skeletonPoint)
         {
-            DepthImagePoint imgPt = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
+            Debug.Assert(m_calibrationStatus == CalibrationStep.Calibrated, "Calibration must have happened BEFORE");
 
+            DepthImagePoint imgPt = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
             return new Point3D(imgPt.X, imgPt.Y, imgPt.Depth);
         }
 
-        private Point kinectToProjectionPoint(SkeletonPoint point)
+        public Point KinectToProjectionPoint(SkeletonPoint point)
         {
+            Debug.Assert(m_calibrationStatus == CalibrationStep.Calibrated, "Calibration must have happened BEFORE");
+
             DepthImagePoint depthP = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(point, DepthImageFormat.Resolution640x480Fps30);
             Point3D p = new Point3D(depthP.X, depthP.Y, depthP.Depth);
 
