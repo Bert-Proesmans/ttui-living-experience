@@ -340,13 +340,21 @@ namespace TTISDproject
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.Black, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
-                /*
                 if (skeletons.Length != 0)
                 {
                     foreach (Skeleton skel in skeletons)
                     {
                         // RenderClippedEdges(skel, dc);
 
+                        Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
+                        dc.DrawEllipse(
+                            centerPointBrush, 
+                            null, 
+                            skel2DCenter, 
+                            BodyCenterThickness, 
+                            BodyCenterThickness);
+
+                        /*
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
                             this.DrawBonesAndJoints(skel, dc);
@@ -360,9 +368,9 @@ namespace TTISDproject
                             BodyCenterThickness,
                             BodyCenterThickness);
                         }
+                        */
                     }
                 }
-                */
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
