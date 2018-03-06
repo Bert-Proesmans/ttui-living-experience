@@ -34,10 +34,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Emgu.CV.UI">
-      <HintPath>..\..\..\..\..\..\..\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.UI.dll</HintPath>
+      <HintPath>C:\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.UI.dll</HintPath>
     </Reference>
     <Reference Include="Emgu.CV.World">
-      <HintPath>..\..\..\..\..\..\..\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.World.dll</HintPath>
+      <HintPath>C:\Emgu\emgucv-windesktop 3.3.0.2824\bin\Emgu.CV.World.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Kinect, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -61,6 +61,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CalibrationStatus.cs" />
     <Compile Include="Util.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -76,7 +77,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PartialCalibrationClass.cs" />
+    <Compile Include="CalibrationClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

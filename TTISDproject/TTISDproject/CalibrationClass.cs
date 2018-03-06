@@ -9,7 +9,7 @@ using System.Windows.Media.Media3D;
 
 namespace Microsoft.Samples.Kinect.ControlsBasics
 {
-    class PartialCalibrationClass
+    class CalibrationClass
     {
         private KinectSensor m_kinectSensor = null;
 
@@ -19,7 +19,7 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
         private Matrix3D m_groundPlaneTransform; //step 2 transform
         private Emgu.CV.Matrix<double> m_transform; //step 3 transform
 
-        public PartialCalibrationClass()
+        public CalibrationClass()
         {
 
         }
