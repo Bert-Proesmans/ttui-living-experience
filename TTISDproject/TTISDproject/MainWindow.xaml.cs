@@ -1,6 +1,7 @@
 ﻿using Microsoft.Kinect;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,7 @@ namespace TTISDproject
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         /// <summary>
         /// Width of output drawing
@@ -62,19 +63,43 @@ namespace TTISDproject
         private DrawingImage imageSource;
 
         /// <summary>
-        /// Status of the 3D to 2D calibration
-        /// </summary>
-        private CalibrationStatus calibrationStatus;
-
-        /// <summary>
-        /// Last completed calibration step
+        /// Status of the 3D to 2D calibration step
         /// </summary>
         private CalibrationStep calibrationStep;
 
+        public CalibrationStep CalibrationStep
+        {
+            get
+            {
+                return calibrationStep;
+            }
+
+            set { 
+                calibrationStep = value;
+                RaisePropertyChanged(nameof(CalibrationStep));
+            }
+        }      
+
+        /// <summary>
+        /// Event handler collector.
+        /// Register to this event to receive a notification when properties of this class changed.
+        /// eg:
+        ///     PropertyChanged += MainWindow_PropertyChanged;
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Helper method to notify property changed event listeners
+        /// </summary>
+        /// <param name="propertyName"></param>
+        private void RaisePropertyChanged(string propertyName)
+        {
+            this.PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         /// <summary>
@@ -141,6 +166,29 @@ namespace TTISDproject
             if (null != this.sensor)
             {
                 this.sensor.Stop();
+            }
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if(e.Key == Key.Space)
+            {
+                switch(calibrationStep)
+                {
+                    case CalibrationStep.PointOne:
+                        // Lock in point one
+                        break;
+                    case CalibrationStep.PointTwo:
+                        // Lock in point two
+                        break;
+                    case CalibrationStep.PointThree:
+                        // Lock in point three
+                        break;
+                    case CalibrationStep.PointFour:
+                        // Lock in point four
+                    default:
+                        break;
+                }
             }
         }
 

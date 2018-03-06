@@ -5,18 +5,15 @@ using System.Text;
 
 namespace TTISDproject
 {
-    enum CalibrationStatus
+    public enum CalibrationStep
     {
         NotCalibrated,
-        Calibrated
-    }
 
-    enum CalibrationStep
-    {
-        Start,
         PointOne,
         PointTwo,
         PointThree,
-        End
+        PointFour,
+
+        Calibrated
     }
 }
