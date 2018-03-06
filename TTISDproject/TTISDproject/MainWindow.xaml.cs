@@ -63,9 +63,6 @@ namespace TTISDproject
         private DrawingImage imageSource;
 
         /// <summary>
-<<<<<<< HEAD
-        /// Last completed calibration step
-=======
         /// Status of the 3D to 2D calibration step
         /// </summary>
         private CalibrationStep calibrationStep;
@@ -88,7 +85,6 @@ namespace TTISDproject
         /// Register to this event to receive a notification when properties of this class changed.
         /// eg:
         ///     PropertyChanged += MainWindow_PropertyChanged;
->>>>>>> 1725fa85986420697cf7d46e33033a9261d0b548
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -152,13 +148,11 @@ namespace TTISDproject
                 {
                     this.sensor = null;
                 }
-                //TODO dialog
-                string messageBoxText = "Please calibrate the application";
-                string caption = "callibration";
-                MessageBoxButton button = MessageBoxButton.OK;
-                MessageBoxImage icon = MessageBoxImage.Exclamation;
-                MessageBox.Show(messageBoxText, caption, button, icon);
-                
+
+                PropertyChanged += EnumPropertyChange;
+
+         
+                CalibrationStep = CalibrationStep.NotCalibrated;
                 
 
             }
@@ -167,6 +161,55 @@ namespace TTISDproject
             {
                 this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
+        }
+
+        private void EnumPropertyChange(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(CalibrationStep))
+                switch (calibrationStep)
+                {
+                    case CalibrationStep.NotCalibrated:
+                        string messageBoxText = "Please calibrate the application";
+                        string caption = "calibration";
+                        MessageBoxButton button = MessageBoxButton.OK;
+                        MessageBoxImage icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        break;
+
+                    case CalibrationStep.PointOne:
+                        messageBoxText = "Step 1 completed, now calibrate step 2";
+                        caption = "calibration";
+                        button = MessageBoxButton.OK;
+                        icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        break;
+                    case CalibrationStep.PointTwo:
+                        messageBoxText = "Step 2 completed, now calibrate step 3";
+                        caption = "calibration";
+                        button = MessageBoxButton.OK;
+                        icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        break;
+                    case CalibrationStep.PointThree:
+                        messageBoxText = "Step 3 completed, now calibrate step 4";
+                        caption = "calibration";
+                        button = MessageBoxButton.OK;
+                        icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        break;
+                    case CalibrationStep.PointFour:
+                        messageBoxText = "Calibration completed, enjoy the app";
+                        caption = "calibration";
+                        button = MessageBoxButton.OK;
+                        icon = MessageBoxImage.Exclamation;
+                        MessageBox.Show(messageBoxText, caption, button, icon);
+                        break;
+                    case CalibrationStep.Calibrated:
+
+                        break;
+                    default:
+                        break;
+                }
         }
 
         /// <summary>
