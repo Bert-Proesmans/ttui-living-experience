@@ -62,11 +62,6 @@ namespace TTISDproject
         private DrawingImage imageSource;
 
         /// <summary>
-        /// Status of the 3D to 2D calibration
-        /// </summary>
-        private CalibrationStatus calibrationStatus;
-
-        /// <summary>
         /// Last completed calibration step
         /// </summary>
         private CalibrationStep calibrationStep;
@@ -123,6 +118,15 @@ namespace TTISDproject
                 {
                     this.sensor = null;
                 }
+                //TODO dialog
+                string messageBoxText = "Please calibrate the application";
+                string caption = "callibration";
+                MessageBoxButton button = MessageBoxButton.OK;
+                MessageBoxImage icon = MessageBoxImage.Exclamation;
+                MessageBox.Show(messageBoxText, caption, button, icon);
+                
+                
+
             }
 
             if (null == this.sensor)
