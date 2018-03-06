@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Media.Media3D;
-
 //shared with students
 
 namespace Microsoft.Samples.Kinect.ControlsBasics
@@ -14,9 +13,9 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
     {
         private KinectSensor m_kinectSensor = null;
 
-        private List<CalibrationPoint> m_calibPoints = new List<CalibrationPoint>(); //2d calibration points
+        private List<Point> m_calibPoints = new List<Point>(); //2d calibration points
         private List<SkeletonPoint> m_skeletonCalibPoints = new List<SkeletonPoint>(); //3d skeleton points
-
+         
         private Matrix3D m_groundPlaneTransform; //step 2 transform
         private Emgu.CV.Matrix<double> m_transform; //step 3 transform
 
@@ -61,10 +60,10 @@ namespace Microsoft.Samples.Kinect.ControlsBasics
                 src[3] = new System.Drawing.PointF((float)p3OnPlane.X, (float)p3OnPlane.Y);
 
                 System.Drawing.PointF[] dest = new System.Drawing.PointF[4];
-                dest[0] = new System.Drawing.PointF((float)m_calibPoints[0].Position.X, (float)m_calibPoints[0].Position.Y);
-                dest[1] = new System.Drawing.PointF((float)m_calibPoints[1].Position.X, (float)m_calibPoints[1].Position.Y);
-                dest[2] = new System.Drawing.PointF((float)m_calibPoints[2].Position.X, (float)m_calibPoints[2].Position.Y);
-                dest[3] = new System.Drawing.PointF((float)m_calibPoints[3].Position.X, (float)m_calibPoints[3].Position.Y);
+                dest[0] = new System.Drawing.PointF((float)m_calibPoints[0].X, (float)m_calibPoints[0].Y);
+                dest[1] = new System.Drawing.PointF((float)m_calibPoints[1].X, (float)m_calibPoints[1].Y);
+                dest[2] = new System.Drawing.PointF((float)m_calibPoints[2].X, (float)m_calibPoints[2].Y);
+                dest[3] = new System.Drawing.PointF((float)m_calibPoints[3].X, (float)m_calibPoints[3].Y);
 
                 Emgu.CV.Mat transform = Emgu.CV.CvInvoke.GetPerspectiveTransform(src, dest);
 
