@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -306,11 +307,13 @@ namespace TTISDproject
                         if (skeletonFrame.SkeletonArrayLength < 1)
                         {
                             // TODO; Notify no skeleton found
+                            Debug.WriteLine("Less than ONE SKELETON found");
                             return;
                         }
                         else if (skeletonFrame.SkeletonArrayLength > 1)
                         {
                             // TODO; Notify multiple people in frame
+                            Debug.WriteLine("Multiple SKELETONS found");
                             return;
                         }
 
@@ -320,6 +323,8 @@ namespace TTISDproject
                         skeletonFrame.CopySkeletonDataTo(skelCalibrator);
                         // Get position of single detected skeleton
                         SkeletonPoint point3D = skelCalibrator[0].Position;
+
+                        Debug.WriteLine("1 Skeleton found, calibrating on position");
 
                         switch (calibrationStep)
                         {
@@ -345,6 +350,8 @@ namespace TTISDproject
                                 CalibrationStep = CalibrationStep.Calibrated;
                                 break;
                             default:
+                                string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
+                                Debug.WriteLine(message);
                                 break;
                         }
                     }
