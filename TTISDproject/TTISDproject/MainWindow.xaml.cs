@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -53,6 +54,11 @@ namespace TTISDproject
         private readonly Brush inferredJointBrush = Brushes.Yellow;
 
         /// <summary>
+        /// Brush used for drawing objects requiring attention
+        /// </summary>
+        private readonly Brush markerBrush = Brushes.Red;
+
+        /// <summary>
         /// Thickness of drawn joint lines
         /// </summary>
         private const double JointThickness = 3;
@@ -80,17 +86,17 @@ namespace TTISDproject
         /// <summary>
         /// TopRight corner of our 2D drawing scene
         /// </summary>
-        private readonly Point Point2DStepTwo = new Point(200, 0);
+        private readonly Point Point2DStepTwo = new Point(RenderWidth, 0);
 
         /// <summary>
         /// BottomLeft corner of our 2D drawing scene
         /// </summary>
-        private readonly Point Point2DStepThree = new Point(0, 200);
+        private readonly Point Point2DStepThree = new Point(0, RenderHeight);
 
         /// <summary>
         /// BottomRight corner of our 2D drawing scene
         /// </summary>
-        private readonly Point Point2DStepFour = new Point(200, 200);
+        private readonly Point Point2DStepFour = new Point(RenderWidth, RenderHeight);
 
         /// <summary>
         /// Active Kinect sensor
@@ -170,7 +176,8 @@ namespace TTISDproject
 
             KeyUp += ButtonPressed;
 
-
+            
+            SensorSkeletonFrameReady(null, null);
 
             // Look through all sensors and start the first connected one.
             // This requires that a Kinect is connected at the time of app startup.
@@ -312,11 +319,13 @@ namespace TTISDproject
                         if (skeletonFrame.SkeletonArrayLength < 1)
                         {
                             // TODO; Notify no skeleton found
+                            Debug.WriteLine("Less than ONE SKELETON found");
                             return;
                         }
                         else if (skeletonFrame.SkeletonArrayLength > 1)
                         {
                             // TODO; Notify multiple people in frame
+                            Debug.WriteLine("Multiple SKELETONS found");
                             return;
                         }
 
@@ -326,6 +335,8 @@ namespace TTISDproject
                         skeletonFrame.CopySkeletonDataTo(skelCalibrator);
                         // Get position of single detected skeleton
                         SkeletonPoint point3D = skelCalibrator[0].Position;
+
+                        Debug.WriteLine("1 Skeleton found, calibrating on position");
 
                         switch (calibrationStep)
                         {
@@ -354,6 +365,8 @@ namespace TTISDproject
                                 CalibrationStep = CalibrationStep.Calibrated;
                                 break;
                             default:
+                                string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
+                                Debug.WriteLine(message);
                                 break;
                         }
                     }
@@ -361,7 +374,61 @@ namespace TTISDproject
             }
         }
 
+        /// <summary>
+        /// Event handler for Kinect sensor's SkeletonFrameReady event
+        /// </summary>
+        /// <param name="sender">object sending the event</param>
+        /// <param name="e">event arguments</param>
+        private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
+        {
+            Skeleton[] skeletons = new Skeleton[0];
 
+
+                if (e != null)
+                {
+                    using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
+                    {
+                        if (skeletonFrame != null)
+                        {
+                            skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                            skeletonFrame.CopySkeletonDataTo(skeletons);
+                        }
+                    }
+                }
+
+            using (DrawingContext dc = this.drawingGroup.Open())
+            {
+                // Draw a transparent background to set the render size
+                dc.DrawRectangle(Brushes.White, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+
+                double markerRadius = 20.0;
+                dc.DrawEllipse(markerBrush, null, Point2DStepOne, markerRadius, markerRadius);
+                dc.DrawEllipse(markerBrush, null, Point2DStepTwo, markerRadius, markerRadius);
+                dc.DrawEllipse(markerBrush, null, Point2DStepThree, markerRadius, markerRadius);
+                dc.DrawEllipse(markerBrush, null, Point2DStepFour, markerRadius, markerRadius);
+
+                if (skeletons.Length != 0)
+                {
+                    foreach (Skeleton skel in skeletons)
+                    {
+                        Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
+
+                        // Render the position of each person onto our birds-eye view
+                        dc.DrawEllipse(
+                            centerPointBrush,
+                            null,
+                            skel2DCenter,
+                            BodyCenterThickness,
+                            BodyCenterThickness);
+                    }
+                }
+
+                // prevent drawing outside of our render area
+                this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
+            }
+        }
+
+        
 
         private void ButtonPressed(object sender, KeyEventArgs e)
         {
