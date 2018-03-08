@@ -43,6 +43,31 @@ namespace TTISDproject
         private const double BodyCenterThickness = 10;
 
         /// <summary>
+        /// Brush used for drawing joints that are currently tracked
+        /// </summary>
+        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
+
+        /// <summary>
+        /// Brush used for drawing joints that are currently inferred
+        /// </summary>        
+        private readonly Brush inferredJointBrush = Brushes.Yellow;
+
+        /// <summary>
+        /// Thickness of drawn joint lines
+        /// </summary>
+        private const double JointThickness = 3;
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently tracked
+        /// </summary>
+        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
+
+        /// <summary>
+        /// Pen used for drawing bones that are currently inferred
+        /// </summary>        
+        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
+
+        /// <summary>
         /// Brush used to draw skeleton center point
         /// </summary>
         private readonly Brush centerPointBrush = Brushes.Blue;
@@ -86,39 +111,6 @@ namespace TTISDproject
         /// Status of the 3D to 2D calibration step
         /// </summary>
         private CalibrationStep calibrationStep;
-
-
-
-        /// <summary>
-        /// Brush used for drawing joints that are currently tracked
-        /// </summary>
-        private readonly Brush trackedJointBrush = new SolidColorBrush(Color.FromArgb(255, 68, 192, 68));
-
-        /// <summary>
-        /// Brush used for drawing joints that are currently inferred
-        /// </summary>        
-        private readonly Brush inferredJointBrush = Brushes.Yellow;
-
-        /// <summary>
-        /// Thickness of drawn joint lines
-        /// </summary>
-        private const double JointThickness = 3;
-
-        /// <summary>
-        /// Pen used for drawing bones that are currently tracked
-        /// </summary>
-        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
-
-        /// <summary>
-        /// Pen used for drawing bones that are currently inferred
-        /// </summary>        
-        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
-
-
-
-
-
-
         public CalibrationStep CalibrationStep
         {
             get
@@ -206,11 +198,7 @@ namespace TTISDproject
                 }
 
                 PropertyChanged += EnumPropertyChange;
-
-         
                 CalibrationStep = CalibrationStep.NotCalibrated;
-                
-
             }
 
             if (null != this.sensor)
@@ -234,32 +222,43 @@ namespace TTISDproject
                 {
                     case CalibrationStep.NotCalibrated:
                         string messageBoxText = "Please calibrate the application";
+                        /*
                         string caption = "calibration";
                         MessageBoxButton button = MessageBoxButton.OK;
                         MessageBoxImage icon = MessageBoxImage.Exclamation;
                         MessageBox.Show(messageBoxText, caption, button, icon);
+                        */
+                        this.statusBarText.Text = messageBoxText;
                         break;
-
                     case CalibrationStep.PointOne:
                         messageBoxText = "Step 1 completed, now calibrate step 2";
+                        /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
                         icon = MessageBoxImage.Exclamation;
                         MessageBox.Show(messageBoxText, caption, button, icon);
+                        */
+                        this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointTwo:
                         messageBoxText = "Step 2 completed, now calibrate step 3";
+                        /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
                         icon = MessageBoxImage.Exclamation;
                         MessageBox.Show(messageBoxText, caption, button, icon);
+                        */
+                        this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointThree:
                         messageBoxText = "Step 3 completed, now calibrate step 4";
+                        /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
                         icon = MessageBoxImage.Exclamation;
                         MessageBox.Show(messageBoxText, caption, button, icon);
+                        */
+                        this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointFour:
                         messageBoxText = "Calibration completed, enjoy the app";
@@ -269,8 +268,7 @@ namespace TTISDproject
                         icon = MessageBoxImage.Exclamation;
                         MessageBox.Show(messageBoxText, caption, button, icon);
                         */
-                        this.statusBarText.Text = "Calibration completed, enjoy the app";
-
+                        this.statusBarText.Text = messageBoxText;
 
                         // Add an event handler to be called whenever there is new color frame data
                         this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
@@ -414,10 +412,6 @@ namespace TTISDproject
             }
         }
         
-
-
-
-
         private void DrawBonesAndJoints(Skeleton skeleton, DrawingContext drawingContext)
         {
             // Render Torso
@@ -517,8 +511,5 @@ namespace TTISDproject
 
             drawingContext.DrawLine(drawPen, this.SkeletonPointToScreen(joint0.Position), this.SkeletonPointToScreen(joint1.Position));
         }
-
-
-
     }
 }
