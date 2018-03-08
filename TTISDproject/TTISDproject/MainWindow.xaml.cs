@@ -23,6 +23,9 @@ namespace TTISDproject
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+
+        SkeletonView win2; //skeletonwindow
+
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -311,8 +314,14 @@ namespace TTISDproject
         {
             if (e.Key == Key.Space)
             {
+                Debug.WriteLine("space pressed");
+                if (win2 != null) {
+                    win2.Unsubscribe();
+                }
+
                 using (SkeletonFrame skeletonFrame = this.sensor.SkeletonStream.OpenNextFrame(200))
                 {
+                    Debug.WriteLine("testen op skeleton data");
                     if (skeletonFrame != null)
                     {
 
@@ -422,20 +431,19 @@ namespace TTISDproject
                             BodyCenterThickness);
                     }
                 }
+                
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
         }
 
-        
-
         private void ButtonPressed(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.J)
             {
 
-                SkeletonView win2 = new SkeletonView();
+                win2 = new SkeletonView();
                 win2.Show();
                 //this.Close();
             }
