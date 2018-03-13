@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using TTISDproject.gestures;
 
 namespace TTISDproject
 {
@@ -117,6 +118,11 @@ namespace TTISDproject
         private DrawingImage imageSource;
 
         /// <summary>
+        /// Contains a mapping of all gesture identifiers per tracked skeleton
+        /// </summary>
+        private Dictionary<int, IGesture[]> gestureMapper;
+
+        /// <summary>
         /// Status of the 3D to 2D calibration step
         /// </summary>
         private CalibrationStep calibrationStep;
@@ -150,6 +156,8 @@ namespace TTISDproject
         public MainWindow()
         {
             InitializeComponent();
+
+            gestureMapper = new Dictionary<int, IGesture[]>();
         }
 
         /// <summary>
@@ -178,7 +186,6 @@ namespace TTISDproject
             Image.Source = this.imageSource;
 
             KeyUp += ButtonPressed;
-
 
             SensorSkeletonFrameReady(null, null);
 
@@ -401,6 +408,36 @@ namespace TTISDproject
             }
         }
 
+        private IGesture[] RetrieveGesturesForSkel(int skeletonID)
+        {
+            IGesture[] result;
+
+            gestureMapper.TryGetValue(skeletonID, out result);
+            if (result == null)
+            {
+                result = new IGesture[]
+                {
+                    new RHSWaveGesture()
+                };
+
+                foreach(IGesture g in result)
+                {
+                    g.OnRecognized += OnGestureRecognized;
+                }
+
+                gestureMapper[skeletonID] = result;
+            }
+
+            return result;
+        }
+
+        private void OnGestureRecognized(object sender, GestureEventArgs e)
+        {
+            string recognizer = sender.GetType().Name;
+            int skel_id = e.TrackingID;
+            Debug.WriteLine("Recognized gesture from {0} for skeleton id {1}", recognizer, skel_id);
+        }
+
         /// <summary>
         /// Event handler for Kinect sensor's SkeletonFrameReady event
         /// </summary>
@@ -437,21 +474,26 @@ namespace TTISDproject
 
                 if (skeletons.Length != 0)
                 {
-                    foreach (Skeleton skel in skeletons)
+                    var trackedSkeletons = skeletons.Where(s => s.TrackingState == SkeletonTrackingState.Tracked);
+                    foreach (Skeleton skel in trackedSkeletons)
                     {
-                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        // Update gesture trackers with new frame information.
+                        IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId);
+                        foreach(IGesture g in gestures)
                         {
-                            Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
-                            Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
-
-                            // Render the position of each person onto our birds-eye view
-                            dc.DrawEllipse(
-                                centerPointBrush,
-                                null,
-                                skel2DCenter,
-                                BodyCenterThickness,
-                                BodyCenterThickness);
+                            g.Update(skel);
                         }
+
+                        Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
+                        Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
+
+                        // Render the position of each person onto our birds-eye view
+                        dc.DrawEllipse(
+                            centerPointBrush,
+                            null,
+                            skel2DCenter,
+                            BodyCenterThickness,
+                            BodyCenterThickness);
                     }
                 }
 

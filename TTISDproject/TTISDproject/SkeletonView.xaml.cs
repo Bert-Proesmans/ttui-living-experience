@@ -23,6 +23,7 @@ namespace TTISDproject
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
+    using System.Diagnostics;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -196,7 +197,8 @@ namespace TTISDproject
             }
         }
 
-        public void Subscribe() {
+        public void Subscribe()
+        {
             this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
 
         }
@@ -256,17 +258,18 @@ namespace TTISDproject
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
+                            Debug.WriteLine("Tracking ID: {0}", skel.TrackingId);
                             this.DrawBonesAndJoints(skel, dc);
                         }
-                        else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
-                        {
-                            dc.DrawEllipse(
-                            this.centerPointBrush,
-                            null,
-                            this.SkeletonPointToScreen(skel.Position),
-                            BodyCenterThickness,
-                            BodyCenterThickness);
-                        }
+                        //else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+                        //{
+                        //    dc.DrawEllipse(
+                        //    this.centerPointBrush,
+                        //    null,
+                        //    this.SkeletonPointToScreen(skel.Position),
+                        //    BodyCenterThickness,
+                        //    BodyCenterThickness);
+                        //}
                     }
                 }
 
