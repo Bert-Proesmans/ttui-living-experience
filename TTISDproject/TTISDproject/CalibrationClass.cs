@@ -92,27 +92,23 @@ namespace TTISDproject
                 transform.CopyTo(m_transform);
 
                 m_calibrationStatus = CalibrationStep.Calibrated;
-                
-
 
                 //test to see if resulting perspective transform is correct
                 //tResultx should be same as points in m_calibPoints
-                Point tResult0 = KinectToProjectionPoint(m_skeletonCalibPoints[0]);
-                Point tResult1 = KinectToProjectionPoint(m_skeletonCalibPoints[1]);
-                Point tResult2 = KinectToProjectionPoint(m_skeletonCalibPoints[2]);
-                Point tResult3 = KinectToProjectionPoint(m_skeletonCalibPoints[3]);
+                //Point tResult0 = KinectToProjectionPoint(m_skeletonCalibPoints[0]);
+                //Point tResult1 = KinectToProjectionPoint(m_skeletonCalibPoints[1]);
+                //Point tResult2 = KinectToProjectionPoint(m_skeletonCalibPoints[2]);
+                //Point tResult3 = KinectToProjectionPoint(m_skeletonCalibPoints[3]);
 
-                if (tResult0 != m_calibPoints[0] || tResult1 != m_calibPoints[1] || tResult2 != m_calibPoints[2] || tResult3 != m_calibPoints[3]) {
-
-                    Debug.Fail("wrong calibration");
-                }
-               
+                //Debug.Assert(tResult0.Equals(m_calibPoints[0]));
+                //Debug.Assert(tResult1.Equals(m_calibPoints[1]));
+                //Debug.Assert(tResult2.Equals(m_calibPoints[2]));
+                //Debug.Assert(tResult3.Equals(m_calibPoints[3]));
             }
         }
 
         public Point3D ConertSkeletonPointToDepthPoint(SkeletonPoint skeletonPoint)
         {
-
             DepthImagePoint imgPt = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
             return new Point3D(imgPt.X, imgPt.Y, imgPt.Depth);
         }
