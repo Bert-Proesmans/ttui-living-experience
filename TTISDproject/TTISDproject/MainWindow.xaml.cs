@@ -373,9 +373,6 @@ namespace TTISDproject
                                         //now draw the position on the UI.
                                         //TODO add seperate subscribe/unsubscribe via listener.
                                         this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
-
-
-
                                         break;
                                     default:
                                         string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
@@ -442,16 +439,19 @@ namespace TTISDproject
                 {
                     foreach (Skeleton skel in skeletons)
                     {
-                        Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
-                        Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
+                        if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                        {
+                            Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
+                            Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
 
-                        // Render the position of each person onto our birds-eye view
-                        dc.DrawEllipse(
-                            centerPointBrush,
-                            null,
-                            skel2DCenter,
-                            BodyCenterThickness,
-                            BodyCenterThickness);
+                            // Render the position of each person onto our birds-eye view
+                            dc.DrawEllipse(
+                                centerPointBrush,
+                                null,
+                                skel2DCenter,
+                                BodyCenterThickness,
+                                BodyCenterThickness);
+                        }
                     }
                 }
 
