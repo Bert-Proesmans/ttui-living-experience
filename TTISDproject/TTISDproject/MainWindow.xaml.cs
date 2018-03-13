@@ -179,7 +179,7 @@ namespace TTISDproject
 
             KeyUp += ButtonPressed;
 
-            
+
             SensorSkeletonFrameReady(null, null);
 
             // Look through all sensors and start the first connected one.
@@ -286,11 +286,11 @@ namespace TTISDproject
                         this.statusBarText.Text = messageBoxText;
 
                         // Add an event handler to be called whenever there is new color frame data
-                       // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                        // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                         break;
                     case CalibrationStep.Calibrated:
-                            messageBoxText = "Calibration completed, enjoy the app";
-                            this.statusBarText.Text = messageBoxText;
+                        messageBoxText = "Calibration completed, enjoy the app";
+                        this.statusBarText.Text = messageBoxText;
                         break;
                     default:
                         break;
@@ -316,7 +316,8 @@ namespace TTISDproject
             if (e.Key == Key.Space)
             {
                 Debug.WriteLine("space pressed");
-                if (win2 != null) {
+                if (win2 != null)
+                {
                     win2.Unsubscribe();
                 }
 
@@ -329,11 +330,11 @@ namespace TTISDproject
                         Skeleton[] skeletons = new Skeleton[0];
                         skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                         skeletonFrame.CopySkeletonDataTo(skeletons);
-                        
+
 
                         foreach (Skeleton skel in skeletons)
                         {
-                            
+
 
                             if (skel.TrackingState == SkeletonTrackingState.Tracked)
                             {
@@ -388,9 +389,9 @@ namespace TTISDproject
                             {
                                 Debug.WriteLine("1 positiononly found");
                             }
-                            
+
                         }
-                       
+
                     }
                 }
 
@@ -410,20 +411,21 @@ namespace TTISDproject
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
+            Debug.WriteLine("OnSensorSkeletonFrameReady");
+
             Skeleton[] skeletons = new Skeleton[0];
 
-
-                if (e != null)
+            if (e != null)
+            {
+                using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
                 {
-                    using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
+                    if (skeletonFrame != null)
                     {
-                        if (skeletonFrame != null)
-                        {
-                            skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
-                            skeletonFrame.CopySkeletonDataTo(skeletons);
-                        }
+                        skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                        skeletonFrame.CopySkeletonDataTo(skeletons);
                     }
                 }
+            }
 
             using (DrawingContext dc = this.drawingGroup.Open())
             {
@@ -441,6 +443,7 @@ namespace TTISDproject
                     foreach (Skeleton skel in skeletons)
                     {
                         Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
+                        Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
 
                         // Render the position of each person onto our birds-eye view
                         dc.DrawEllipse(
@@ -451,7 +454,7 @@ namespace TTISDproject
                             BodyCenterThickness);
                     }
                 }
-                
+
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
