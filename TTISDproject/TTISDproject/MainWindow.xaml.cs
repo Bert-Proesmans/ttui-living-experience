@@ -374,6 +374,7 @@ namespace TTISDproject
                                         this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
 
 
+
                                         break;
                                     default:
                                         string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
