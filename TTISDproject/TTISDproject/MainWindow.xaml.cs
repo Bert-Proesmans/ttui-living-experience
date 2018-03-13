@@ -246,7 +246,7 @@ namespace TTISDproject
                         this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointOne:
-                        messageBoxText = "Step 1 completed, now calibrate step 2";
+                        messageBoxText = "Calibrate Step 1";
                         /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
@@ -256,7 +256,7 @@ namespace TTISDproject
                         this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointTwo:
-                        messageBoxText = "Step 2 completed, now calibrate step 3";
+                        messageBoxText = "Step 1 completed, now calibrate step 2";
                         /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
@@ -266,7 +266,7 @@ namespace TTISDproject
                         this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointThree:
-                        messageBoxText = "Step 3 completed, now calibrate step 4";
+                        messageBoxText = "Step 2 completed, now calibrate step 3";
                         /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
@@ -276,7 +276,7 @@ namespace TTISDproject
                         this.statusBarText.Text = messageBoxText;
                         break;
                     case CalibrationStep.PointFour:
-                        messageBoxText = "Calibration completed, enjoy the app";
+                        messageBoxText = "Step 3 completed, now calibrate step 4";
                         /*
                         caption = "calibration";
                         button = MessageBoxButton.OK;
@@ -289,7 +289,8 @@ namespace TTISDproject
                        // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
                         break;
                     case CalibrationStep.Calibrated:
-
+                            messageBoxText = "Calibration completed, enjoy the app";
+                            this.statusBarText.Text = messageBoxText;
                         break;
                     default:
                         break;
@@ -325,61 +326,79 @@ namespace TTISDproject
                     if (skeletonFrame != null)
                     {
 
-                        if (skeletonFrame.SkeletonArrayLength < 1)
+                        Skeleton[] skeletons = new Skeleton[0];
+                        skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
+                        skeletonFrame.CopySkeletonDataTo(skeletons);
+                        
+
+                        foreach (Skeleton skel in skeletons)
                         {
-                            // TODO; Notify no skeleton found
-                            Debug.WriteLine("Less than ONE SKELETON found");
-                            return;
+                            
+
+                            if (skel.TrackingState == SkeletonTrackingState.Tracked)
+                            {
+                                Debug.WriteLine("1 tracked found");
+                                SkeletonPoint point3D = skel.Position;
+
+                                Debug.WriteLine(calibrationStep.ToString());
+
+                                switch (calibrationStep)
+                                {
+                                    case CalibrationStep.NotCalibrated:
+                                        // Start calibration
+                                        CalibrationStep = CalibrationStep.PointOne;
+                                        break;
+
+                                    case CalibrationStep.PointOne:
+                                        // Lock in point one
+                                        calibrationClass.AddCalibrationPoint(Point2DStepOne, point3D);
+                                        CalibrationStep = CalibrationStep.PointTwo;
+                                        break;
+                                    case CalibrationStep.PointTwo:
+                                        // Lock in point two
+                                        calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
+                                        CalibrationStep = CalibrationStep.PointThree;
+                                        break;
+                                    case CalibrationStep.PointThree:
+                                        // Lock in point three
+                                        calibrationClass.AddCalibrationPoint(Point2DStepThree, point3D);
+                                        CalibrationStep = CalibrationStep.PointFour;
+                                        break;
+                                    case CalibrationStep.PointFour:
+                                        // Lock in point four.
+                                        // This automatically forces calibration.
+                                        calibrationClass.AddCalibrationPoint(Point2DStepFour, point3D);
+                                        CalibrationStep = CalibrationStep.Calibrated;
+                                        //now draw the position on the UI.
+                                        //TODO add seperate subscribe/unsubscribe via listener.
+                                        this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+
+
+                                        break;
+                                    default:
+                                        string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
+                                        Debug.WriteLine(message);
+                                        break;
+                                }
+
+
+                            }
+                            else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
+                            {
+                                Debug.WriteLine("1 positiononly found");
+                            }
+                            
                         }
-                        else if (skeletonFrame.SkeletonArrayLength > 1)
-                        {
-                            // TODO; Notify multiple people in frame
-                            Debug.WriteLine("Multiple SKELETONS found");
-                            return;
-                        }
-
-                        // Copy skeleton data into managed buffer, this is how it
-                        // should be done..
-                        Skeleton[] skelCalibrator = new Skeleton[1];
-                        skeletonFrame.CopySkeletonDataTo(skelCalibrator);
-                        // Get position of single detected skeleton
-                        SkeletonPoint point3D = skelCalibrator[0].Position;
-
-                        Debug.WriteLine("1 Skeleton found, calibrating on position");
-
-                        switch (calibrationStep)
-                        {
-                            case CalibrationStep.PointOne:
-                                // Lock in point one
-
-
-
-                                calibrationClass.AddCalibrationPoint(Point2DStepOne, point3D);
-                                CalibrationStep = CalibrationStep.PointTwo;
-                                break;
-                            case CalibrationStep.PointTwo:
-                                // Lock in point two
-                                calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
-                                CalibrationStep = CalibrationStep.PointThree;
-                                break;
-                            case CalibrationStep.PointThree:
-                                // Lock in point three
-                                calibrationClass.AddCalibrationPoint(Point2DStepThree, point3D);
-                                CalibrationStep = CalibrationStep.PointFour;
-                                break;
-                            case CalibrationStep.PointFour:
-                                // Lock in point four.
-                                // This automatically forces calibration.
-                                calibrationClass.AddCalibrationPoint(Point2DStepFour, point3D);
-                                CalibrationStep = CalibrationStep.Calibrated;
-                                break;
-                            default:
-                                string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
-                                Debug.WriteLine(message);
-                                break;
-                        }
+                       
                     }
                 }
+
+                Debug.WriteLine("space pressed");
+                if (win2 != null)
+                {
+                    win2.Subscribe();
+                }
+
             }
         }
 

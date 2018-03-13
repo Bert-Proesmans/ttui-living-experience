@@ -220,7 +220,8 @@ namespace TTISDproject
         {
             if (null != this.sensor)
             {
-                this.sensor.Stop();
+                // this.sensor.Stop();
+                this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
             }
         }
 
