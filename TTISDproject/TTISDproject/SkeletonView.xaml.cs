@@ -226,8 +226,9 @@ namespace TTISDproject
             {
                 result = new IGesture[]
                 {
-                    new RHSWaveGesture(),
-                    new JumpGesture(skel)
+                    // DBG
+                    //new RHSWaveGesture(),
+                    //new JumpGesture(skel)
                 };
 
                 result[0].OnRecognized += OnWaveRecognized;
