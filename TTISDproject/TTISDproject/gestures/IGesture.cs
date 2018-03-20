@@ -10,7 +10,7 @@ namespace TTISDproject.gestures
     interface IGesture
     {
         event GestureRecognizedHandler OnRecognized;
-        void Update(Skeleton skeleton);
+        void Update(KinectSensor sensor, Skeleton skeleton);
         void Reset();
     }
 }

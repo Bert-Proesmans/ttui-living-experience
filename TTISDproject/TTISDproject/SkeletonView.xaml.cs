@@ -24,6 +24,7 @@ namespace TTISDproject
     using System.Windows.Media;
     using Microsoft.Kinect;
     using System.Diagnostics;
+    using TTISDproject.gestures;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -96,11 +97,18 @@ namespace TTISDproject
         private DrawingImage imageSource;
 
         /// <summary>
+        /// Contains a mapping of all gesture identifiers per tracked skeleton
+        /// </summary>
+        private Dictionary<int, IGesture[]> gestureMapper;
+
+        /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
         public SkeletonView()
         {
             InitializeComponent();
+
+            gestureMapper = new Dictionary<int, IGesture[]>();
         }
 
         /// <summary>
@@ -209,10 +217,6 @@ namespace TTISDproject
 
         }
 
-
-
-
-
         /// <summary>
         /// Execute shutdown tasks
         /// </summary>
@@ -225,6 +229,34 @@ namespace TTISDproject
                 // this.sensor.Stop();
                 this.sensor.SkeletonFrameReady -= this.SensorSkeletonFrameReady;
             }
+        }
+
+        private IGesture[] RetrieveGesturesForSkel(int skeletonID)
+        {
+            IGesture[] result;
+
+            gestureMapper.TryGetValue(skeletonID, out result);
+            if (result == null)
+            {
+                result = new IGesture[]
+                {
+                    new RHSWaveGesture()
+                };
+
+
+                result[0].OnRecognized += OnWaveRecognized;
+                //
+                gestureMapper[skeletonID] = result;
+            }
+
+            return result;
+        }
+
+        private void OnWaveRecognized(object sender, GestureEventArgs e)
+        {
+            string recognizer = sender.GetType().Name;
+            int skel_id = e.TrackingID;
+            Debug.WriteLine("WAVE RECOGNIZED: {0} for skeleton id {1}", recognizer, skel_id);
         }
 
         /// <summary>
@@ -252,13 +284,21 @@ namespace TTISDproject
 
                 if (skeletons.Length != 0)
                 {
-                    foreach (Skeleton skel in skeletons)
+                    var trackedSkeletons = skeletons.Where(s => s.TrackingState == SkeletonTrackingState.Tracked);
+                    foreach (Skeleton skel in trackedSkeletons)
                     {
+                        // Update gesture trackers with new frame information.
+                        IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId);
+                        foreach (IGesture g in gestures)
+                        {
+                            g.Update(this.sensor, skel);
+                        }
+
                         RenderClippedEdges(skel, dc);
 
                         if (skel.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            Debug.WriteLine("Tracking ID: {0}", skel.TrackingId);
+                            // Debug.WriteLine("Tracking ID: {0}", skel.TrackingId);
                             this.DrawBonesAndJoints(skel, dc);
                         }
                         //else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)

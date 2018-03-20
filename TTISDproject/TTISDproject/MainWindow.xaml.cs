@@ -481,11 +481,11 @@ namespace TTISDproject
                         IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId);
                         foreach(IGesture g in gestures)
                         {
-                            g.Update(skel);
+                            g.Update(this.sensor, skel);
                         }
 
                         Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
-                        Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
+                        // Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
 
                         // Render the position of each person onto our birds-eye view
                         dc.DrawEllipse(

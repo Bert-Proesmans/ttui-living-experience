@@ -84,6 +84,8 @@
     <Compile Include="gestures\GesturePartResult.cs" />
     <Compile Include="gestures\IGesture.cs" />
     <Compile Include="gestures\IGestureSegment.cs" />
+    <Compile Include="gestures\Jump.cs" />
+    <Compile Include="gestures\JumpData.cs" />
     <Compile Include="gestures\Wave.cs" />
     <Compile Include="SkeletonView.xaml.cs">
       <DependentUpon>SkeletonView.xaml</DependentUpon>

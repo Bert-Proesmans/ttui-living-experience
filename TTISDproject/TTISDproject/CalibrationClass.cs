@@ -50,10 +50,10 @@ namespace TTISDproject
                 && m_skeletonCalibPoints.Count == 4)
             {
                 //seketon 3D positions --> 3d positions in depth camera
-                Point3D p0 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[0]);
-                Point3D p1 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[1]);
-                Point3D p2 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[2]);
-                Point3D p3 = ConertSkeletonPointToDepthPoint(m_skeletonCalibPoints[3]);
+                Point3D p0 = ConvertSkeletonPointToDepthPoint(m_kinectSensor, m_skeletonCalibPoints[0]);
+                Point3D p1 = ConvertSkeletonPointToDepthPoint(m_kinectSensor, m_skeletonCalibPoints[1]);
+                Point3D p2 = ConvertSkeletonPointToDepthPoint(m_kinectSensor, m_skeletonCalibPoints[2]);
+                Point3D p3 = ConvertSkeletonPointToDepthPoint(m_kinectSensor, m_skeletonCalibPoints[3]);
 
                 //3d positions depth camera --> positions on a 2D plane
                 Vector3D v1 = p1 - p0;
@@ -107,9 +107,9 @@ namespace TTISDproject
             }
         }
 
-        public Point3D ConertSkeletonPointToDepthPoint(SkeletonPoint skeletonPoint)
+        public static Point3D ConvertSkeletonPointToDepthPoint(KinectSensor sensor, SkeletonPoint skeletonPoint)
         {
-            DepthImagePoint imgPt = m_kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
+            DepthImagePoint imgPt = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
             return new Point3D(imgPt.X, imgPt.Y, imgPt.Depth);
         }
 

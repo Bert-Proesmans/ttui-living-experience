@@ -7,6 +7,7 @@ namespace TTISDproject.gestures
 {
     enum GesturePartResult
     {
+        Undecided,
         Failed,
         Succeeded
     }
