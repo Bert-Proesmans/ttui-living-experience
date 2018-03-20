@@ -16,7 +16,7 @@ namespace TTISDproject
 
         private List<Point> m_calibPoints = new List<Point>(); //2d calibration points
         private List<SkeletonPoint> m_skeletonCalibPoints = new List<SkeletonPoint>(); //3d skeleton points
-         
+
         private Matrix3D m_groundPlaneTransform; //step 2 transform
         private Emgu.CV.Matrix<double> m_transform; //step 3 transform
 
@@ -111,6 +111,12 @@ namespace TTISDproject
         {
             DepthImagePoint imgPt = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
             return new Point3D(imgPt.X, imgPt.Y, imgPt.Depth);
+        }
+
+        public static Point ConvertSkeletonPointToScreen(KinectSensor sensor, SkeletonPoint skeletonPoint)
+        {
+            DepthImagePoint imgPt = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(skeletonPoint, DepthImageFormat.Resolution640x480Fps30);
+            return new Point(imgPt.X, imgPt.Y);
         }
 
         public Point KinectToProjectionPoint(SkeletonPoint point)

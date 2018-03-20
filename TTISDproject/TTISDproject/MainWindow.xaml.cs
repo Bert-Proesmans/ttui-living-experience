@@ -27,6 +27,29 @@ namespace TTISDproject
 
         SkeletonView win2; //skeletonwindow
 
+        private class TrackingData
+        {
+            public enum ThemeKeys
+            {
+                Animals,
+                Presidents,
+                Houses,
+                Beaches,
+            }
+
+            public int TrackingId { get; private set; }
+            public IGesture[] Gestures { get; private set; }
+            public ThemeKeys Theme;
+
+            public TrackingData(int trackingId, IGesture[] gestures)
+            {
+                TrackingId = trackingId;
+                Gestures = gestures;
+                // Default to first theme
+                Theme = ThemeKeys.Animals;
+            }
+        }
+
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -66,16 +89,6 @@ namespace TTISDproject
         /// Thickness of drawn joint lines
         /// </summary>
         private const double JointThickness = 3;
-
-        /// <summary>
-        /// Pen used for drawing bones that are currently tracked
-        /// </summary>
-        private readonly Pen trackedBonePen = new Pen(Brushes.Green, 6);
-
-        /// <summary>
-        /// Pen used for drawing bones that are currently inferred
-        /// </summary>        
-        private readonly Pen inferredBonePen = new Pen(Brushes.Gray, 1);
 
         /// <summary>
         /// Brush used to draw skeleton center point
@@ -120,7 +133,7 @@ namespace TTISDproject
         /// <summary>
         /// Contains a mapping of all gesture identifiers per tracked skeleton
         /// </summary>
-        private Dictionary<int, IGesture[]> gestureMapper;
+        private Dictionary<int, TrackingData> trackingMapper;
 
         /// <summary>
         /// Status of the 3D to 2D calibration step
@@ -156,10 +169,11 @@ namespace TTISDproject
         public MainWindow()
         {
             InitializeComponent();
-
-            gestureMapper = new Dictionary<int, IGesture[]>();
+            
+            //gestureMapper = new Dictionary<int, IGesture[]>();
 
             //Emgu.CV.Matrix<double> test = new Emgu.CV.Matrix<double>(5,5,1);
+            trackingMapper = new Dictionary<int, TrackingData>();
         }
 
         /// <summary>
@@ -410,24 +424,27 @@ namespace TTISDproject
             }
         }
 
-        private IGesture[] RetrieveGesturesForSkel(int skeletonID)
+        private TrackingData RetrieveTrackingData(int skeletonID)
         {
-            IGesture[] result;
+            TrackingData result;
 
-            gestureMapper.TryGetValue(skeletonID, out result);
+            trackingMapper.TryGetValue(skeletonID, out result);
             if (result == null)
             {
-                result = new IGesture[]
+                IGesture[] gestures = new IGesture[]
                 {
-                    new RHSWaveGesture()
+                    // new RHSWaveGesture(),
+                    // new JumpGesture(skel)
                 };
 
-                foreach(IGesture g in result)
+                foreach (IGesture g in gestures)
                 {
                     g.OnRecognized += OnGestureRecognized;
                 }
 
-                gestureMapper[skeletonID] = result;
+                result = new TrackingData(skeletonID, null);
+
+                trackingMapper[skeletonID] = result;
             }
 
             return result;
@@ -468,6 +485,13 @@ namespace TTISDproject
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.White, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
+                // Draw playfield themes
+                dc.DrawRectangle(Brushes.Green, null, new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                dc.DrawRectangle(Brushes.Yellow, null, new Rect(RenderWidth / 2.0, 0, RenderWidth / 2.0, RenderHeight / 2.0));
+                dc.DrawRectangle(Brushes.Tomato, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                // Draw edge markers
                 double markerRadius = 20.0;
                 dc.DrawEllipse(markerBrush, null, Point2DStepOne, markerRadius, markerRadius);
                 dc.DrawEllipse(markerBrush, null, Point2DStepTwo, markerRadius, markerRadius);
@@ -480,8 +504,8 @@ namespace TTISDproject
                     foreach (Skeleton skel in trackedSkeletons)
                     {
                         // Update gesture trackers with new frame information.
-                        IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId);
-                        foreach(IGesture g in gestures)
+                        TrackingData data = RetrieveTrackingData(skel.TrackingId);
+                        foreach(IGesture g in data.Gestures)
                         {
                             g.Update(this.sensor, skel);
                         }

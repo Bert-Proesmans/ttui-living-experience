@@ -98,7 +98,7 @@ namespace TTISDproject.gestures
 
             segments = new IGestureSegment[]
             {
-                // We want exactly TWO waves in WINDOW_SIZE samples!s
+                // We want exactly ONE waves
                 segOne, segTwo,
                 // segOne, segTwo,
                 // segOne, segTwo,

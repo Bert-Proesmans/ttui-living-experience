@@ -12,10 +12,34 @@ namespace TTISDproject.gestures
 
     class JumpSegment1 : IJumpSegment
     {
-        public GesturePartResult Update(KinectSensor sensor, PointF[] kalman_result)
+        public GesturePartResult Update(KinectSensor sensor, Skeleton skel, float[][] kalman_result)
         {
-            float predicted_y = kalman_result[0].Y;
-            float actual_y = kalman_result[1].Y;
+            float[] predicted = kalman_result[0];
+            float[] actual = kalman_result[1];
+
+            float predicted_speed_y = predicted[3];
+            float actual_speed_y = actual[3];
+
+            Debug.WriteLine("UP\tY speed: {0} --- {1}", predicted_speed_y, actual_speed_y);
+
+            var left_foot_y = skel.Joints[JointType.AnkleLeft].Position.Y;
+            var right_foot_y = skel.Joints[JointType.AnkleRight].Position.Y;
+
+            // Debug.WriteLine("Feet Y: {0} --- {1}", left_foot_y, right_foot_y);
+
+            // Both feet at same height
+            if (Util.NearlyEqual(left_foot_y, right_foot_y, 0.05f))
+            {
+                // Movement upwards
+                if (actual_speed_y > 0)
+                {
+                    if (predicted_speed_y < actual_speed_y)
+                    {
+                        Debug.WriteLine("UP");
+                        return GesturePartResult.Succeeded;
+                    }
+                }
+            }
 
             return GesturePartResult.Failed;
         }
@@ -23,18 +47,42 @@ namespace TTISDproject.gestures
 
     class JumpSegment2 : IJumpSegment
     {
-        public GesturePartResult Update(KinectSensor sensor, PointF[] kalman_result)
+        public GesturePartResult Update(KinectSensor sensor, Skeleton skel, float[][] kalman_result)
         {
-            float predicted_y = kalman_result[0].Y;
-            float actual_y = kalman_result[1].Y;
+            float[] predicted = kalman_result[0];
+            float[] actual = kalman_result[1];
+
+            float predicted_speed_y = predicted[3];
+            float actual_speed_y = actual[3];
+
+            // Debug.WriteLine("DOWN\tY speed: {0} --- {1}", predicted_speed_y, actual_speed_y);
+
+            var left_foot_y = skel.Joints[JointType.AnkleLeft].Position.Y;
+            var right_foot_y = skel.Joints[JointType.AnkleRight].Position.Y;
+
+            // Debug.WriteLine("Feet Y: {0} --- {1}", left_foot_y, right_foot_y);
+
+            // Both feet at same height
+            if (Util.NearlyEqual(left_foot_y, right_foot_y, 0.05f))
+            {
+                // Movement downwards
+                if (actual_speed_y < 0)
+                {
+                    if (predicted_speed_y > actual_speed_y)
+                    {
+                        Debug.WriteLine("DOWN");
+                        return GesturePartResult.Succeeded;
+                    }
+                }
+            }
 
             return GesturePartResult.Failed;
         }
     }
 
-    class Jump : IGesture
+    class JumpGesture : IGesture
     {
-        readonly int WINDOW_SIZE = 50;
+        readonly int WINDOW_SIZE = 20;
 
         IJumpSegment[] segments;
         GesturePartResult[] results;
@@ -47,7 +95,7 @@ namespace TTISDproject.gestures
 
         public event GestureEventArgs.GestureRecognizedHandler OnRecognized;
 
-        public Jump()
+        public JumpGesture(Skeleton skel)
         {
             var segOne = new JumpSegment1();
             var segTwo = new JumpSegment2();
@@ -66,19 +114,21 @@ namespace TTISDproject.gestures
                 GesturePartResult.Failed,
             };
 
-            SetupKalmanFilter();
+            SetupKalmanFilter(skel);
         }
 
-        private void SetupKalmanFilter()
+        private void SetupKalmanFilter(Skeleton skel)
         {
             kal = new KalmanFilter(4, 2, 0);
             syntheticData = new JumpData();
-            // Initial state of the skeleton.
-            // TODO; Find out if the initial position of (0,0) will invoke errors.
+
+            // Initial state of the skeleton, positioned at 0.
             Matrix<float> state = new Matrix<float>(new float[]
             {
-                0.0f, 0.0f, 0.0f, 0.0f
+                0.0f, 0.0f,
+                0.0f, 0.0f
             });
+
             // Transfer references into the kalman-filter
             state.Mat.CopyTo(kal.StatePost); // == correctedstate
             syntheticData.transition.Mat.CopyTo(kal.TransitionMatrix);
@@ -96,47 +146,49 @@ namespace TTISDproject.gestures
 
         public void Update(KinectSensor sensor, Skeleton skeleton)
         {
-            var bone_hip = skeleton.Joints[JointType.HipCenter];
-            if(bone_hip.TrackingState == JointTrackingState.NotTracked)
+            var left_foot = skeleton.Joints[JointType.AnkleLeft];
+            var right_foot = skeleton.Joints[JointType.AnkleRight];
+            if (left_foot.TrackingState != JointTrackingState.Tracked ||
+                right_foot.TrackingState != JointTrackingState.Tracked)
             {
                 Reset();
                 return;
             }
 
             // Update filter
-            float pos_hip_x = bone_hip.Position.X;
-            float pos_hip_y = bone_hip.Position.Y;
+            var left_foot_pos = left_foot.Position;
+            var right_foot_pos = right_foot.Position;
+            float pos_feet_x = (left_foot_pos.X + right_foot_pos.X) / 2.0f;
+            float pos_feet_y = (left_foot_pos.Y + right_foot_pos.Y) / 2.0f;
 
-            syntheticData.state[0, 0] = pos_hip_x;
-            syntheticData.state[1, 0] = pos_hip_y;
+            syntheticData.state[0, 0] = pos_feet_x;
+            syntheticData.state[1, 0] = pos_feet_y;
             // Prediction from Kalman for the next timestep.
-            float[] pred = new float[2];
+            float[] pred = new float[4];
             kal.Predict();
             kal.StatePre.CopyTo(pred);
-            PointF predictedPoint = new PointF(pred[0], pred[1]);
+            PointF predictedPositionPoint = new PointF(pred[0], pred[1]);
             // Update kalman state with a noice induced measurement.
             Matrix<float> measurement = syntheticData.GetMeasurement();
             PointF measurePoint = new PointF(measurement[0, 0], measurement[1, 0]);
             kal.Correct(measurement.Mat);
             // Get an adjusted internal state measurement.
-            float[] estimated = new float[2];
+            float[] estimated = new float[4];
             kal.StatePost.CopyTo(estimated);
-            PointF estimatedPoint = new PointF(estimated[0], estimated[1]);
+            PointF estimatedPositionPoint = new PointF(estimated[0], estimated[1]);
             // 
             syntheticData.GoToNextState();
 
-            Debug.WriteLine("KALMAN X: {0}, Y: {1}", estimated[0], estimated[1]);
-
             // Note: This is the data passed into the segment recognizer
-            PointF[] kal_results = new PointF[2]
+            float[][] kal_results = new float[2][]
             {
-                predictedPoint,
-                estimatedPoint
+                pred,
+                estimated
             };
 
             for (int i = 0; i < segments.Length; ++i)
             {
-                results[i] = segments[i].Update(sensor, kal_results);
+                results[i] = segments[i].Update(sensor, skeleton, kal_results);
             }
 
             GesturePartResult result = results[currentSegmentIdx];
