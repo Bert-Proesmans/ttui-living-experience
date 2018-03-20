@@ -26,10 +26,20 @@ namespace TTISDproject.gestures
                 {0f }, // y-velocity
             });
 
+            // Low noise tolerance -> quick changes in velocity 
+            //transition = new Matrix<float>(new float[,]
+            //{
+            //    {1, 0, 1, 0 }, // Expected change on state for x-pos
+            //    {0, 1, 0, 1 }, // ..
+            //    {0, 0, 1, 0 }, // Expected change on state for x-velocity
+            //    {0, 0, 0, 1 }, // ..
+            //});
+
+            // Higher noise tolerance -> slow changes in velocity
             transition = new Matrix<float>(new float[,]
             {
-                {1, 0, 1, 0 }, // Expected change on state for x-pos
-                {0, 1, 0, 1 }, // ..
+                {1, 0, 0.1f, 0 }, // Expected change on state for x-pos
+                {0, 1, 0, 0.1f }, // ..
                 {0, 0, 1, 0 }, // Expected change on state for x-velocity
                 {0, 0, 0, 1 }, // ..
             });

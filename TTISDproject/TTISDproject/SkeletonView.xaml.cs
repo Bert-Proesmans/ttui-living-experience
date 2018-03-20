@@ -1,31 +1,17 @@
-﻿using System;
+﻿using Microsoft.Kinect;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using Microsoft.Kinect;
-using System.ComponentModel;
-using System.IO;
-using System.Windows.Navigation;
-
-
+using System.Windows.Threading;
+using TTISDproject.gestures;
 
 namespace TTISDproject
 {
-    using System.IO;
-    using System.Windows;
-    using System.Windows.Media;
-    using Microsoft.Kinect;
-    using System.Diagnostics;
-    using TTISDproject.gestures;
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -231,7 +217,7 @@ namespace TTISDproject
             }
         }
 
-        private IGesture[] RetrieveGesturesForSkel(int skeletonID)
+        private IGesture[] RetrieveGesturesForSkel(int skeletonID, Skeleton skel)
         {
             IGesture[] result;
 
@@ -240,16 +226,36 @@ namespace TTISDproject
             {
                 result = new IGesture[]
                 {
-                    new RHSWaveGesture()
+                    new RHSWaveGesture(),
+                    new JumpGesture(skel)
                 };
 
-
                 result[0].OnRecognized += OnWaveRecognized;
+
+                /* Give the kalman filter some time to converge before firing events */
+                var kalman_wait_time = 1; // in seconds
+                var dispatcherTimer = new DispatcherTimer();
+                dispatcherTimer.Tick += (sender, e) =>
+                {
+                    Debug.WriteLine("Delayed subscription on JUMP");
+                    result[1].OnRecognized += OnJumpRecognized;
+                    dispatcherTimer.Stop();
+                };
+                dispatcherTimer.Interval = new TimeSpan(0, 0, kalman_wait_time);
+                dispatcherTimer.Start();
+
                 //
                 gestureMapper[skeletonID] = result;
             }
 
             return result;
+        }
+
+        private void OnJumpRecognized(object sender, GestureEventArgs e)
+        {
+            string recognizer = sender.GetType().Name;
+            int skel_id = e.TrackingID;
+            Debug.WriteLine("JUMP RECOGNIZED: {0} for skeleton id {1}", recognizer, skel_id);
         }
 
         private void OnWaveRecognized(object sender, GestureEventArgs e)
@@ -288,7 +294,7 @@ namespace TTISDproject
                     foreach (Skeleton skel in trackedSkeletons)
                     {
                         // Update gesture trackers with new frame information.
-                        IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId);
+                        IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId, skel);
                         foreach (IGesture g in gestures)
                         {
                             g.Update(this.sensor, skel);

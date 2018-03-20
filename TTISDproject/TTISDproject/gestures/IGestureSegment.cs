@@ -14,6 +14,6 @@ namespace TTISDproject.gestures
 
     interface IJumpSegment
     {
-        GesturePartResult Update(KinectSensor sensor, PointF[] kalman_result);
+        GesturePartResult Update(KinectSensor sensor, Skeleton skeleton, float[][] kalman_result);
     }
 }

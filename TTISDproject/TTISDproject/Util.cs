@@ -41,6 +41,17 @@ namespace TTISDproject
             //compute squared length of 3-vector
             return a.X * a.X + a.Y * a.Y + a.Z * a.Z;
         }
+
+        public static bool NearlyEqual(float value_one, float value_two, float epsilon = 0.02f)
+        {
+            if (value_one != value_two)
+            {
+                return Math.Abs(value_one - value_two) < epsilon;
+            }
+
+            return true;
+        }
+
         public static double float_epsilon()
         {
             //smallest difference between numbers for 32-bit floats
