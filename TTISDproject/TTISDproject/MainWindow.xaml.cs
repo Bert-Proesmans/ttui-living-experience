@@ -158,6 +158,8 @@ namespace TTISDproject
             InitializeComponent();
 
             gestureMapper = new Dictionary<int, IGesture[]>();
+
+            //Emgu.CV.Matrix<double> test = new Emgu.CV.Matrix<double>(5,5,1);
         }
 
         /// <summary>
