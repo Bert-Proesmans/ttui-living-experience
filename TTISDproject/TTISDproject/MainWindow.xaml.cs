@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TTISDproject.gestures;
+using System.Globalization;
 
 namespace TTISDproject
 {
@@ -49,6 +50,13 @@ namespace TTISDproject
                 Theme = ThemeKeys.Animals;
             }
         }
+
+        //theme selected => 1 is ... 2 is ... 3 is ... 4 is ...
+        private int selectedTheme = 3;
+
+        private int selectedPage = 1;
+
+
 
         /// <summary>
         /// Width of output drawing
@@ -485,11 +493,339 @@ namespace TTISDproject
                 // Draw a transparent background to set the render size
                 dc.DrawRectangle(Brushes.White, null, new Rect(0.0, 0.0, RenderWidth, RenderHeight));
 
-                // Draw playfield themes
-                dc.DrawRectangle(Brushes.Green, null, new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0));
-                dc.DrawRectangle(Brushes.Yellow, null, new Rect(RenderWidth / 2.0, 0, RenderWidth / 2.0, RenderHeight / 2.0));
-                dc.DrawRectangle(Brushes.Tomato, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
-                dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                //// Draw playfield themes
+                //dc.DrawRectangle(Brushes.Green, null, new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                //dc.DrawRectangle(Brushes.Yellow, null, new Rect(RenderWidth / 2.0, 0, RenderWidth / 2.0, RenderHeight / 2.0));
+                //dc.DrawRectangle(Brushes.Tomato, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                //dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                ////if theme1 selected
+                switch (selectedTheme)
+                {
+                    case 0:
+
+                        System.Windows.Media.ImageSource imagetheme1 = new BitmapImage(new Uri("images/maincosmos.png", UriKind.Relative));
+                        Rect rectTheme1 = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                        dc.DrawImage(imagetheme1, rectTheme1);
+                        System.Windows.Media.ImageSource imagetheme2 = new BitmapImage(new Uri("images/mainhistory.png", UriKind.Relative));
+                        Rect rectTheme2 = new Rect(RenderWidth / 2.0, 0, RenderWidth / 2.0, RenderHeight / 2.0);
+                        dc.DrawImage(imagetheme2, rectTheme2);
+                        System.Windows.Media.ImageSource imagetheme3 = new BitmapImage(new Uri("images/mainnature.png", UriKind.Relative));
+                        Rect rectTheme3 = new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                        dc.DrawImage(imagetheme3, rectTheme3);
+                        System.Windows.Media.ImageSource imagetheme4 = new BitmapImage(new Uri("images/mainart.png", UriKind.Relative));
+                        Rect rectTheme4 = new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                        dc.DrawImage(imagetheme4, rectTheme4);
+                        break;
+                    case 1:
+                        //showcosmospictures
+                        if (selectedPage == 2)
+                        { //showpage2
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/blackhole.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "A black hole is a region of spacetime exhibiting such strong gravitational effects that nothing—not even particles and electromagnetic radiation such as light—can escape from inside it.The theory of general relativity predicts that a sufficiently compact mass can deform spacetime to form a black hole. The boundary of the region from which no escape is possible is called the event horizon. Although the event horizon has an enormous effect on the fate and circumstances of an object crossing it, no locally detectable features appear to be observed.In many ways a black hole acts like an ideal black body, as it reflects no light.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0)+100, RenderHeight / 2.0+150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+
+
+                        }
+                        else {//showpage1
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/Nebula.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "A nebula (Latin for cloud or fog) is an interstellar cloud of dust, hydrogen, helium and other ionized gases.Originally, nebula was a name for any diffuse astronomical object, including galaxies beyond the Milky Way.The Andromeda Galaxy, for instance, was once referred to as the Andromeda Nebula(and spiral galaxies in general as spiral nebulae) before the true nature of galaxies was confirmed in the early 20th century by Vesto Slipher, Edwin Hubble and others.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+                        }
+
+                            break;
+                    case 2:
+                        //show history pictures
+                        if (selectedPage == 2)
+                        { //showpage2
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/atillathefun.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "Attila (circa 406–453), frequently called Attila the Hun, was the ruler of the Huns from 434 until his death in March 453. He was also the leader of a tribal empire consisting of Huns, Ostrogoths, and Alans among others, on the territory of Central and Eastern Europe. During his reign, he was one of the most feared enemies of the Western and Eastern Roman Empires.He crossed the Danube twice and plundered the Balkans, but was unable to take Constantinople. His unsuccessful campaign in Persia was followed in 441 by an invasion of the Eastern Roman(Byzantine) Empire, the success of which emboldened Attila to invade the West.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+
+
+                        }
+                        else
+                        {//showpage1
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/williamtheconquerer.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "William I (1028 – 9 September 1087), usually known as William the Conqueror and sometimes William the Bastard, was the first Norman King of England, reigning from 1066 until his death in 1087. A descendant of Rollo, he was Duke of Normandy, from 1035 onward. After a long struggle to establish his power, by 1060 his hold on Normandy was secure, and he launched the Norman conquest of England six years later. The rest of his life was marked by struggles to consolidate his hold over England and his continental lands and by difficulties with his eldest son.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+                        }
+                        break;
+                    case 3:
+                        //show nature pictures
+                        if (selectedPage == 2)
+                        { //showpage2
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/passionflower.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "Passiflora, known also as the passion flowers or passion vines, is a genus of about 550 species of flowering plants, the type genus of the family Passifloraceae.They are mostly tendril-bearing vines, with some being shrubs or trees. They can be woody or herbaceous. Passion flowers produce regular and usually showy flowers with a distinctive corona. The medical utility of only a few species of Passiflora has been scientifically studied. In initial study in 2001 for treatment of generalized anxiety disorder, maypop extract performed as well as oxazepam but with fewer short-term side effects.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+
+
+                        }
+                        else
+                        {//showpage1
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/mountainlorel.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "Kalmia latifolia, commonly called mountain laurel, calico-bush or spoonwood, is a broadleaved evergreen shrub in the heather family, Ericaceae, that is native to the eastern United States. Its range stretches from southern Maine south to northern Florida, and west to Indiana and Louisiana. Mountain laurel is the state flower of Connecticut and Pennsylvania. It is the namesake of Laurel County in Kentucky and the city of Laurel, Mississippi (founded 1882). The plant was originally brought to Europe as an ornamental plant during the 18th century. It is still widely grown for its attractive flowers and year round evergreen leaves. All parts of this plant are toxic if ingested.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+                        }
+                        break;
+                    case 4:
+                        //show nature pictures
+                        if (selectedPage == 2)
+                        { //showpage2
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/picasso.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "Pablo Picasso (25 October 1881 – 8 April 1973) was a Spanish painter, sculptor, printmaker, ceramicist, stage designer, poet and playwright who spent most of his adult life in France. Regarded as one of the most influential artists of the 20th century, he is known for co-founding the Cubist movement, the invention of constructed sculpture, the co-invention of collage, and for the wide variety of styles that he helped develop and explore. Among his most famous works are the proto-Cubist Les Demoiselles d'Avignon (1907), and Guernica (1937), a dramatic portrayal of the bombing of Guernica by the German and Italian airforces.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+
+
+                        }
+                        else
+                        {//showpage1
+                            System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/rubens.png", UriKind.Relative));
+                            Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
+                            dc.DrawImage(imageblackhole, rectBlackhole);
+
+
+                            Point point = new Point(RenderWidth / 2.0, 10);
+                            string teststring = "Sir Peter Paul Rubens (28 June 1577 – 30 May 1640) was a Flemish artist. He is considered the most influential artist of Flemish Baroque tradition. Rubens' highly charged compositions reference erudite aspects of classical and Christian history. His unique and immensely popular Baroque style emphasized movement, color, and sensuality, which followed the immediate, dramatic artistic style promoted in the Counter-Reformation. Rubens specialized in making altarpieces, portraits, landscapes, and history paintings of mythological and allegorical subjects.";
+                            System.Windows.Media.FormattedText text = new FormattedText(teststring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 12, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(text, point);
+
+
+                            dc.DrawRectangle(Brushes.LightGreen, null, new Rect(0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+                            dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
+
+                            Point pointPrev = new Point(0 + 100, (RenderHeight / 2.0) + 150);
+                            string prevstring = "previous";
+                            System.Windows.Media.FormattedText prevtext = new FormattedText(prevstring, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(prevtext, pointPrev);
+
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
+                            string prevnext = "next";
+                            System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
+                                FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
+                            text.MaxTextWidth = 300;
+                            text.MaxTextHeight = 1000;
+                            dc.DrawText(nexttext, pointNext);
+                        }
+                        break;
+                }
+
+
+
+
+
+
+
+
 
                 // Draw edge markers
                 double markerRadius = 20.0;

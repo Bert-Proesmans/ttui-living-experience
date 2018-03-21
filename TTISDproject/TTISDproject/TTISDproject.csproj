@@ -151,10 +151,27 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="images\text.docx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\rubens.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\atillathefun.png" />
+    <Resource Include="images\blackhole.png" />
+    <Resource Include="images\mainart.png" />
+    <Resource Include="images\maincosmos.png" />
+    <Resource Include="images\mainhistory.png" />
+    <Resource Include="images\mainnature.png" />
+    <Resource Include="images\mountainlorel.png" />
+    <Resource Include="images\Nebula.png" />
+    <Resource Include="images\passionflower.png" />
+    <Resource Include="images\picasso.png" />
+    <Resource Include="images\williamtheconquerer.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
