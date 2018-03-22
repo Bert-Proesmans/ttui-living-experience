@@ -228,7 +228,7 @@ namespace TTISDproject
                 {
                     // DBG
                     //new RHSWaveGesture(),
-                    new JumpGesture(skel)
+                    // new JumpGesture(skel)
                 };
 
                 //if (result.Length > 0)
@@ -236,16 +236,16 @@ namespace TTISDproject
 
 
                 /* Give the kalman filter some time to converge before firing events */
-                var kalman_wait_time = 1; // in seconds
-                var dispatcherTimer = new DispatcherTimer();
-                dispatcherTimer.Tick += (sender, e) =>
-                {
-                    Debug.WriteLine("Delayed subscription on JUMP");
-                    result[0].OnRecognized += OnJumpRecognized;
-                    dispatcherTimer.Stop();
-                };
-                dispatcherTimer.Interval = new TimeSpan(0, 0, kalman_wait_time);
-                dispatcherTimer.Start();
+                //var kalman_wait_time = 1; // in seconds
+                //var dispatcherTimer = new DispatcherTimer();
+                //dispatcherTimer.Tick += (sender, e) =>
+                //{
+                //    Debug.WriteLine("Delayed subscription on JUMP");
+                //    result[0].OnRecognized += OnJumpRecognized;
+                //    dispatcherTimer.Stop();
+                //};
+                //dispatcherTimer.Interval = new TimeSpan(0, 0, kalman_wait_time);
+                //dispatcherTimer.Start();
 
                 //
                 gestureMapper[skeletonID] = result;

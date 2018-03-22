@@ -252,6 +252,7 @@ namespace TTISDproject
                 // Listen for key to advance the calibration process.
                 KeyUp += Window_Calibrate;
                 KeyUp += Window_AutoCalibrate;
+                KeyUp += Window_Reset;
 
             }
 
@@ -361,6 +362,16 @@ namespace TTISDproject
                     dispatcherTimer.Interval = new TimeSpan(0, 0, 8);
                     dispatcherTimer.Start();
                 }
+            }
+        }
+
+        private void Window_Reset(object sender, KeyEventArgs e)
+        {
+            // Resets the selected theme and page, because there is no gesture.
+            if(e.Key == Key.R)
+            {
+                Theme = ThemeKeys.Main;
+                SelectedPage = 0;
             }
         }
 
@@ -491,32 +502,35 @@ namespace TTISDproject
             Debug.WriteLine("Recognized gesture from {0} for skeleton id {1}", recognizer, skel_id);
 
             Point center = e.Skel2DCenter;
-            // Left of center
-            if (center.X < RenderWidth/2.0)
+            if (Theme == ThemeKeys.Main)
             {
-                // Left top
-                if (center.Y < RenderHeight/2.0)
+                // Left of center
+                if (center.X < RenderWidth / 2.0)
                 {
-                    Theme = ThemeKeys.Space;
+                    // Left top
+                    if (center.Y < RenderHeight / 2.0)
+                    {
+                        Theme = ThemeKeys.Space;
+                    }
+                    // Left bottom
+                    else
+                    {
+                        Theme = ThemeKeys.Nature;
+                    }
                 }
-                // Left bottom
+                // Right of center
                 else
                 {
-                    Theme = ThemeKeys.Nature;
-                }
-            }
-            // Right of center
-            else
-            {
-                // Right top
-                if(center.Y < RenderHeight/2.0)
-                {
-                    Theme = ThemeKeys.History;
-                }
-                // Right bottom
-                else
-                {
-                    Theme = ThemeKeys.Art;
+                    // Right top
+                    if (center.Y < RenderHeight / 2.0)
+                    {
+                        Theme = ThemeKeys.History;
+                    }
+                    // Right bottom
+                    else
+                    {
+                        Theme = ThemeKeys.Art;
+                    }
                 }
             }
         }
