@@ -4,14 +4,17 @@ using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
 using Emgu.CV;
-using System.Drawing;
 using System.Diagnostics;
+using System.Windows;
+using System.Drawing;
 
 namespace TTISDproject.gestures
 {
 
     class JumpSegment1 : IJumpSegment
     {
+        private float last_speed = 0;
+
         public GesturePartResult Update(KinectSensor sensor, Skeleton skel, float[][] kalman_result)
         {
             float[] predicted = kalman_result[0];
@@ -20,7 +23,7 @@ namespace TTISDproject.gestures
             float predicted_speed_y = predicted[3];
             float actual_speed_y = actual[3];
 
-            Debug.WriteLine("UP\tY speed: {0} --- {1}", predicted_speed_y, actual_speed_y);
+            // Debug.WriteLine("UP\tY speed: {0} --- {1}", predicted_speed_y, actual_speed_y);
 
             var left_foot_y = skel.Joints[JointType.AnkleLeft].Position.Y;
             var right_foot_y = skel.Joints[JointType.AnkleRight].Position.Y;
@@ -30,14 +33,21 @@ namespace TTISDproject.gestures
             // Both feet at same height
             if (Util.NearlyEqual(left_foot_y, right_foot_y, 0.05f))
             {
+                bool is_upwards = last_speed < actual_speed_y;
+
                 // Movement upwards
-                if (actual_speed_y > 0)
+                if (is_upwards)
                 {
-                    if (predicted_speed_y < actual_speed_y)
-                    {
-                        Debug.WriteLine("UP");
-                        return GesturePartResult.Succeeded;
-                    }
+                    //if (predicted_speed_y < actual_speed_y)
+                    //{
+                    //    Debug.WriteLine("UP");
+                    //    return GesturePartResult.Succeeded;
+                    //}
+                    last_speed = actual_speed_y;
+                    return GesturePartResult.Succeeded;
+                } else
+                {
+                    last_speed = 0;
                 }
             }
 
@@ -47,6 +57,8 @@ namespace TTISDproject.gestures
 
     class JumpSegment2 : IJumpSegment
     {
+        private float last_speed = 0;
+
         public GesturePartResult Update(KinectSensor sensor, Skeleton skel, float[][] kalman_result)
         {
             float[] predicted = kalman_result[0];
@@ -63,16 +75,24 @@ namespace TTISDproject.gestures
             // Debug.WriteLine("Feet Y: {0} --- {1}", left_foot_y, right_foot_y);
 
             // Both feet at same height
-            if (Util.NearlyEqual(left_foot_y, right_foot_y, 0.05f))
+            if (Util.NearlyEqual(left_foot_y, right_foot_y, 0.1f))
             {
-                // Movement downwards
-                if (actual_speed_y < 0)
+                bool is_downwards = last_speed > actual_speed_y;
+
+                // Movement upwards
+                if (is_downwards)
                 {
-                    if (predicted_speed_y > actual_speed_y)
-                    {
-                        Debug.WriteLine("DOWN");
-                        return GesturePartResult.Succeeded;
-                    }
+                    //if (predicted_speed_y > actual_speed_y)
+                    //{
+                    //    Debug.WriteLine("DOWN");
+                    //    return GesturePartResult.Succeeded;
+                    //}
+
+                    last_speed = actual_speed_y;
+                    return GesturePartResult.Succeeded;
+                } else
+                {
+                    last_speed = 0;
                 }
             }
 
@@ -137,7 +157,7 @@ namespace TTISDproject.gestures
             frameCount = 0;
         }
 
-        public void Update(KinectSensor sensor, Skeleton skeleton)
+        public void Update(KinectSensor sensor, Skeleton skeleton, System.Windows.Point skel2DCenter)
         {
             var left_foot = skeleton.Joints[JointType.AnkleLeft];
             var right_foot = skeleton.Joints[JointType.AnkleRight];
@@ -156,7 +176,7 @@ namespace TTISDproject.gestures
 
             syntheticData.state[0, 0] = pos_feet_x;
             syntheticData.state[1, 0] = pos_feet_y;
-            // Prediction from Kalman for the next timestep.
+            // Prediction from Kalman for this timestep.
             float[] pred = new float[4];
             kal.Predict();
             kal.StatePre.CopyTo(pred);
@@ -191,7 +211,7 @@ namespace TTISDproject.gestures
                 {
                     if (OnRecognized != null)
                     {
-                        OnRecognized(this, new GestureEventArgs(skeleton.TrackingId));
+                        OnRecognized(this, new GestureEventArgs(skeleton.TrackingId, skel2DCenter));
                         Reset();
                     }
                 }

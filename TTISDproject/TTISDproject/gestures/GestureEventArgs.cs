@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows;
 
 namespace TTISDproject.gestures
 {
@@ -12,9 +13,12 @@ namespace TTISDproject.gestures
 
         public int TrackingID { get; private set; }
 
-        public GestureEventArgs(int trackingID)
+        public Point Skel2DCenter { get; private set; }
+
+        public GestureEventArgs(int trackingID, Point skelCenter)
         {
             TrackingID = trackingID;
+            Skel2DCenter = skelCenter;
         }
     }
 }

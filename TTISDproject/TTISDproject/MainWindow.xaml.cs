@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TTISDproject.gestures;
 using System.Globalization;
+using System.Windows.Threading;
 
 namespace TTISDproject
 {
@@ -28,35 +29,30 @@ namespace TTISDproject
 
         SkeletonView win2; //skeletonwindow
 
+        public enum ThemeKeys
+        {
+            Main,
+            Nature,
+            History,
+            Space,
+            Art
+        }
+
+        private ThemeKeys Theme;
+        private int SelectedPage;
+
         private class TrackingData
         {
-            public enum ThemeKeys
-            {
-                Animals,
-                Presidents,
-                Houses,
-                Beaches,
-            }
-
             public int TrackingId { get; private set; }
             public IGesture[] Gestures { get; private set; }
-            public ThemeKeys Theme;
+
 
             public TrackingData(int trackingId, IGesture[] gestures)
             {
                 TrackingId = trackingId;
                 Gestures = gestures;
-                // Default to first theme
-                Theme = ThemeKeys.Animals;
             }
         }
-
-        //theme selected => 1 is ... 2 is ... 3 is ... 4 is ...
-        private int selectedTheme = 3;
-
-        private int selectedPage = 1;
-
-
 
         /// <summary>
         /// Width of output drawing
@@ -177,8 +173,11 @@ namespace TTISDproject
         public MainWindow()
         {
             InitializeComponent();
-            
-            //gestureMapper = new Dictionary<int, IGesture[]>();
+
+            // Default to first theme
+            Theme = ThemeKeys.Main;
+            // Default to first page
+            SelectedPage = 0;
 
             //Emgu.CV.Matrix<double> test = new Emgu.CV.Matrix<double>(5,5,1);
             trackingMapper = new Dictionary<int, TrackingData>();
@@ -209,7 +208,7 @@ namespace TTISDproject
             // Display the drawing using our image control
             Image.Source = this.imageSource;
 
-            KeyUp += ButtonPressed;
+            KeyUp += Window_OpenDebug;
 
             SensorSkeletonFrameReady(null, null);
 
@@ -242,7 +241,7 @@ namespace TTISDproject
                     this.sensor = null;
                 }
 
-                PropertyChanged += EnumPropertyChange;
+                PropertyChanged += CalibrationChanged;
                 CalibrationStep = CalibrationStep.NotCalibrated;
             }
 
@@ -252,6 +251,7 @@ namespace TTISDproject
                 this.calibrationClass = new CalibrationClass(this.sensor);
                 // Listen for key to advance the calibration process.
                 KeyUp += Window_Calibrate;
+                KeyUp += Window_AutoCalibrate;
 
             }
 
@@ -261,60 +261,40 @@ namespace TTISDproject
             }
         }
 
-        private void EnumPropertyChange(object sender, PropertyChangedEventArgs e)
+        private void CalibrationChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(CalibrationStep))
                 switch (calibrationStep)
                 {
                     case CalibrationStep.NotCalibrated:
                         string messageBoxText = "Please calibrate the application";
-                        /*
-                        string caption = "calibration";
-                        MessageBoxButton button = MessageBoxButton.OK;
-                        MessageBoxImage icon = MessageBoxImage.Exclamation;
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        */
                         this.statusBarText.Text = messageBoxText;
+                        Debug.WriteLine("|||||||||||||||||||||||||||||||||");
+                        Debug.WriteLine("PLEASE CALIBRATE !");
                         break;
                     case CalibrationStep.PointOne:
                         messageBoxText = "Calibrate Step 1";
-                        /*
-                        caption = "calibration";
-                        button = MessageBoxButton.OK;
-                        icon = MessageBoxImage.Exclamation;
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        */
                         this.statusBarText.Text = messageBoxText;
+                        Debug.WriteLine("|||||||||||||||||||||||||||||||||");
+                        Debug.WriteLine("CALIBRATE STARTED !");
                         break;
                     case CalibrationStep.PointTwo:
                         messageBoxText = "Step 1 completed, now calibrate step 2";
-                        /*
-                        caption = "calibration";
-                        button = MessageBoxButton.OK;
-                        icon = MessageBoxImage.Exclamation;
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        */
                         this.statusBarText.Text = messageBoxText;
+                        Debug.WriteLine("|||||||||||||||||||||||||||||||||");
+                        Debug.WriteLine("STEP ONE COMPLETE !");
                         break;
                     case CalibrationStep.PointThree:
                         messageBoxText = "Step 2 completed, now calibrate step 3";
-                        /*
-                        caption = "calibration";
-                        button = MessageBoxButton.OK;
-                        icon = MessageBoxImage.Exclamation;
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        */
                         this.statusBarText.Text = messageBoxText;
+                        Debug.WriteLine("|||||||||||||||||||||||||||||||||");
+                        Debug.WriteLine("STEP TWO COMPLETE !");
                         break;
                     case CalibrationStep.PointFour:
                         messageBoxText = "Step 3 completed, now calibrate step 4";
-                        /*
-                        caption = "calibration";
-                        button = MessageBoxButton.OK;
-                        icon = MessageBoxImage.Exclamation;
-                        MessageBox.Show(messageBoxText, caption, button, icon);
-                        */
                         this.statusBarText.Text = messageBoxText;
+                        Debug.WriteLine("|||||||||||||||||||||||||||||||||");
+                        Debug.WriteLine("STEP THREE COMPLETE !");
 
                         // Add an event handler to be called whenever there is new color frame data
                         // this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
@@ -322,6 +302,10 @@ namespace TTISDproject
                     case CalibrationStep.Calibrated:
                         messageBoxText = "Calibration completed, enjoy the app";
                         this.statusBarText.Text = messageBoxText;
+
+                        Debug.WriteLine("----------------------------------");
+                        Debug.WriteLine("STEP FOUR COMPLETE\t\tCALIBRATED !");
+                        Debug.WriteLine("----------------------------------");
                         break;
                     default:
                         break;
@@ -335,11 +319,49 @@ namespace TTISDproject
         /// <param name="e">event arguments</param>
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            /*
             if (null != this.sensor)
             {
                 this.sensor.Stop();
-            }*/
+            }
+        }
+
+        private void Window_AutoCalibrate(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.A)
+            {
+                if (CalibrationStep == CalibrationStep.NotCalibrated)
+                {
+                    var dispatcherTimer = new DispatcherTimer();
+                    dispatcherTimer.Tick += (s2, e2) =>
+                    {
+                        switch (CalibrationStep)
+                        {
+                            case CalibrationStep.NotCalibrated:
+                            case CalibrationStep.PointOne:
+                            case CalibrationStep.PointTwo:
+                            case CalibrationStep.PointThree:
+                            case CalibrationStep.PointFour:
+                                var key = Key.Space;
+                                var target = this;
+                                var routedEvent = Keyboard.KeyUpEvent;
+                                var eventArgs = new KeyEventArgs(Keyboard.PrimaryDevice, PresentationSource.FromVisual(target), 0, key)
+                                {
+                                    RoutedEvent = routedEvent
+                                };
+                                // Invoke calibrate
+                                Window_Calibrate(this, eventArgs);
+                                break;
+
+                            case CalibrationStep.Calibrated:
+                            default:
+                                dispatcherTimer.Stop();
+                                break;
+                        }
+                    };
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 8);
+                    dispatcherTimer.Start();
+                }
+            }
         }
 
         private void Window_Calibrate(object sender, KeyEventArgs e)
@@ -352,78 +374,65 @@ namespace TTISDproject
                     win2.Unsubscribe();
                 }
 
+                Skeleton[] skeletons = null;
                 using (SkeletonFrame skeletonFrame = this.sensor.SkeletonStream.OpenNextFrame(200))
                 {
-                    Debug.WriteLine("testen op skeleton data");
                     if (skeletonFrame != null)
                     {
-
-                        Skeleton[] skeletons = new Skeleton[0];
                         skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                         skeletonFrame.CopySkeletonDataTo(skeletons);
-
-
-                        foreach (Skeleton skel in skeletons)
-                        {
-
-
-                            if (skel.TrackingState == SkeletonTrackingState.Tracked)
-                            {
-                                Debug.WriteLine("1 tracked found");
-                                SkeletonPoint point3D = skel.Position;
-
-                                Debug.WriteLine(calibrationStep.ToString());
-
-                                switch (calibrationStep)
-                                {
-                                    case CalibrationStep.NotCalibrated:
-                                        // Start calibration
-                                        CalibrationStep = CalibrationStep.PointOne;
-                                        break;
-
-                                    case CalibrationStep.PointOne:
-                                        // Lock in point one
-                                        calibrationClass.AddCalibrationPoint(Point2DStepOne, point3D);
-                                        CalibrationStep = CalibrationStep.PointTwo;
-                                        break;
-                                    case CalibrationStep.PointTwo:
-                                        // Lock in point two
-                                        calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
-                                        CalibrationStep = CalibrationStep.PointThree;
-                                        break;
-                                    case CalibrationStep.PointThree:
-                                        // Lock in point three
-                                        calibrationClass.AddCalibrationPoint(Point2DStepThree, point3D);
-                                        CalibrationStep = CalibrationStep.PointFour;
-                                        break;
-                                    case CalibrationStep.PointFour:
-                                        // Lock in point four.
-                                        // This automatically forces calibration.
-                                        calibrationClass.AddCalibrationPoint(Point2DStepFour, point3D);
-                                        CalibrationStep = CalibrationStep.Calibrated;
-                                        //now draw the position on the UI.
-                                        //TODO add seperate subscribe/unsubscribe via listener.
-                                        this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
-                                        break;
-                                    default:
-                                        string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
-                                        Debug.WriteLine(message);
-                                        break;
-                                }
-
-
-                            }
-                            else if (skel.TrackingState == SkeletonTrackingState.PositionOnly)
-                            {
-                                Debug.WriteLine("1 positiononly found");
-                            }
-
-                        }
-
                     }
                 }
 
-                Debug.WriteLine("space pressed");
+                var trackedSkeleton = skeletons.Where(s => s.TrackingState == SkeletonTrackingState.Tracked).SingleOrDefault();
+                if (trackedSkeleton != null)
+                {
+                    Debug.WriteLine("1 tracked found");
+                    SkeletonPoint point3D = trackedSkeleton.Position;
+
+                    Debug.WriteLine(calibrationStep.ToString());
+
+                    switch (calibrationStep)
+                    {
+                        case CalibrationStep.NotCalibrated:
+                            // Start calibration
+                            CalibrationStep = CalibrationStep.PointOne;
+                            break;
+
+                        case CalibrationStep.PointOne:
+                            // Lock in point one
+                            calibrationClass.AddCalibrationPoint(Point2DStepOne, point3D);
+                            CalibrationStep = CalibrationStep.PointTwo;
+                            break;
+                        case CalibrationStep.PointTwo:
+                            // Lock in point two
+                            calibrationClass.AddCalibrationPoint(Point2DStepTwo, point3D);
+                            CalibrationStep = CalibrationStep.PointThree;
+                            break;
+                        case CalibrationStep.PointThree:
+                            // Lock in point three
+                            calibrationClass.AddCalibrationPoint(Point2DStepThree, point3D);
+                            CalibrationStep = CalibrationStep.PointFour;
+                            break;
+                        case CalibrationStep.PointFour:
+                            // Lock in point four.
+                            // This automatically forces calibration.
+                            calibrationClass.AddCalibrationPoint(Point2DStepFour, point3D);
+                            CalibrationStep = CalibrationStep.Calibrated;
+                            //now draw the position on the UI.
+                            //TODO add seperate subscribe/unsubscribe via listener.
+                            this.sensor.SkeletonFrameReady += this.SensorSkeletonFrameReady;
+                            break;
+                        default:
+                            string message = String.Format("Unexpected calibration step: {}", calibrationStep.ToString());
+                            Debug.WriteLine(message);
+                            break;
+                    }
+                } else
+                {
+                    Debug.WriteLine("EXACTLY ONE person must be tracked to calibrate!");
+                }
+
                 if (win2 != null)
                 {
                     win2.Subscribe();
@@ -432,7 +441,7 @@ namespace TTISDproject
             }
         }
 
-        private TrackingData RetrieveTrackingData(int skeletonID)
+        private TrackingData RetrieveTrackingData(int skeletonID, Skeleton skel)
         {
             TrackingData result;
 
@@ -441,16 +450,25 @@ namespace TTISDproject
             {
                 IGesture[] gestures = new IGesture[]
                 {
-                    // new RHSWaveGesture(),
-                    // new JumpGesture(skel)
+                    new RHSWaveGesture(),
+                    new JumpGesture(skel)
                 };
 
-                foreach (IGesture g in gestures)
-                {
-                    g.OnRecognized += OnGestureRecognized;
-                }
+                gestures[0].OnRecognized += OnWaveRecognized;
 
-                result = new TrackingData(skeletonID, null);
+                /* Give the kalman filter some time to converge before firing events */
+                var kalman_wait_time = 1; // in seconds
+                var dispatcherTimer = new DispatcherTimer();
+                dispatcherTimer.Tick += (sender, e) =>
+                {
+                    Debug.WriteLine("Delayed subscription on JUMP");
+                    gestures[1].OnRecognized += OnJumpRecognized;
+                    dispatcherTimer.Stop();
+                };
+                dispatcherTimer.Interval = new TimeSpan(0, 0, kalman_wait_time);
+                dispatcherTimer.Start();
+
+                result = new TrackingData(skeletonID, gestures);
 
                 trackingMapper[skeletonID] = result;
             }
@@ -458,11 +476,49 @@ namespace TTISDproject
             return result;
         }
 
-        private void OnGestureRecognized(object sender, GestureEventArgs e)
+        private void OnWaveRecognized(object sender, GestureEventArgs e)
         {
             string recognizer = sender.GetType().Name;
             int skel_id = e.TrackingID;
             Debug.WriteLine("Recognized gesture from {0} for skeleton id {1}", recognizer, skel_id);
+            this.SelectedPage = this.SelectedPage + 1 % 2;
+        }
+
+        private void OnJumpRecognized(object sender, GestureEventArgs e)
+        {
+            string recognizer = sender.GetType().Name;
+            int skel_id = e.TrackingID;
+            Debug.WriteLine("Recognized gesture from {0} for skeleton id {1}", recognizer, skel_id);
+
+            Point center = e.Skel2DCenter;
+            // Left of center
+            if (center.X < RenderWidth/2.0)
+            {
+                // Left top
+                if (center.Y < RenderHeight/2.0)
+                {
+                    Theme = ThemeKeys.Space;
+                }
+                // Left bottom
+                else
+                {
+                    Theme = ThemeKeys.Nature;
+                }
+            }
+            // Right of center
+            else
+            {
+                // Right top
+                if(center.Y < RenderHeight/2.0)
+                {
+                    Theme = ThemeKeys.History;
+                }
+                // Right bottom
+                else
+                {
+                    Theme = ThemeKeys.Art;
+                }
+            }
         }
 
         /// <summary>
@@ -472,7 +528,7 @@ namespace TTISDproject
         /// <param name="e">event arguments</param>
         private void SensorSkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
         {
-            Debug.WriteLine("OnSensorSkeletonFrameReady");
+            // Debug.WriteLine("OnSensorSkeletonFrameReady");
 
             Skeleton[] skeletons = new Skeleton[0];
 
@@ -500,9 +556,9 @@ namespace TTISDproject
                 //dc.DrawRectangle(Brushes.LightCyan, null, new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0));
 
                 ////if theme1 selected
-                switch (selectedTheme)
+                switch (this.Theme)
                 {
-                    case 0:
+                    case ThemeKeys.Main:
 
                         System.Windows.Media.ImageSource imagetheme1 = new BitmapImage(new Uri("images/maincosmos.png", UriKind.Relative));
                         Rect rectTheme1 = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
@@ -517,9 +573,9 @@ namespace TTISDproject
                         Rect rectTheme4 = new Rect(RenderWidth / 2.0, RenderHeight / 2.0, RenderWidth / 2.0, RenderHeight / 2.0);
                         dc.DrawImage(imagetheme4, rectTheme4);
                         break;
-                    case 1:
+                    case ThemeKeys.Space:
                         //showcosmospictures
-                        if (selectedPage == 2)
+                        if (this.SelectedPage == 1)
                         { //showpage2
                             System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/blackhole.png", UriKind.Relative));
                             Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
@@ -546,7 +602,7 @@ namespace TTISDproject
                             text.MaxTextHeight = 1000;
                             dc.DrawText(prevtext, pointPrev);
 
-                            Point pointNext = new Point((RenderWidth / 2.0)+100, RenderHeight / 2.0+150);
+                            Point pointNext = new Point((RenderWidth / 2.0) + 100, RenderHeight / 2.0 + 150);
                             string prevnext = "next";
                             System.Windows.Media.FormattedText nexttext = new FormattedText(prevnext, CultureInfo.GetCultureInfo("en-us"),
                                 FlowDirection.LeftToRight, new Typeface("Verdana"), 36, Brushes.Black);
@@ -556,7 +612,8 @@ namespace TTISDproject
 
 
                         }
-                        else {//showpage1
+                        else
+                        {//showpage1
                             System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/Nebula.png", UriKind.Relative));
                             Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
                             dc.DrawImage(imageblackhole, rectBlackhole);
@@ -591,10 +648,10 @@ namespace TTISDproject
                             dc.DrawText(nexttext, pointNext);
                         }
 
-                            break;
-                    case 2:
+                        break;
+                    case ThemeKeys.History:
                         //show history pictures
-                        if (selectedPage == 2)
+                        if (this.SelectedPage == 1)
                         { //showpage2
                             System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/atillathefun.png", UriKind.Relative));
                             Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
@@ -667,9 +724,9 @@ namespace TTISDproject
                             dc.DrawText(nexttext, pointNext);
                         }
                         break;
-                    case 3:
+                    case ThemeKeys.Nature:
                         //show nature pictures
-                        if (selectedPage == 2)
+                        if (this.SelectedPage == 1)
                         { //showpage2
                             System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/passionflower.png", UriKind.Relative));
                             Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
@@ -742,9 +799,9 @@ namespace TTISDproject
                             dc.DrawText(nexttext, pointNext);
                         }
                         break;
-                    case 4:
+                    case ThemeKeys.Art:
                         //show nature pictures
-                        if (selectedPage == 2)
+                        if (this.SelectedPage == 1)
                         { //showpage2
                             System.Windows.Media.ImageSource imageblackhole = new BitmapImage(new Uri("images/picasso.png", UriKind.Relative));
                             Rect rectBlackhole = new Rect(0.0, 0.0, RenderWidth / 2.0, RenderHeight / 2.0);
@@ -819,14 +876,6 @@ namespace TTISDproject
                         break;
                 }
 
-
-
-
-
-
-
-
-
                 // Draw edge markers
                 double markerRadius = 20.0;
                 dc.DrawEllipse(markerBrush, null, Point2DStepOne, markerRadius, markerRadius);
@@ -839,15 +888,15 @@ namespace TTISDproject
                     var trackedSkeletons = skeletons.Where(s => s.TrackingState == SkeletonTrackingState.Tracked);
                     foreach (Skeleton skel in trackedSkeletons)
                     {
-                        // Update gesture trackers with new frame information.
-                        TrackingData data = RetrieveTrackingData(skel.TrackingId);
-                        foreach(IGesture g in data.Gestures)
-                        {
-                            g.Update(this.sensor, skel);
-                        }
-
                         Point skel2DCenter = this.calibrationClass.KinectToProjectionPoint(skel.Position);
                         // Debug.WriteLine("Skeleton position at ({0};{1})", skel2DCenter.X, skel2DCenter.Y);
+
+                        // Update gesture trackers with new frame information.
+                        TrackingData data = RetrieveTrackingData(skel.TrackingId, skel);
+                        foreach (IGesture g in data.Gestures)
+                        {
+                            g.Update(this.sensor, skel, skel2DCenter);
+                        }
 
                         // Render the position of each person onto our birds-eye view
                         dc.DrawEllipse(
@@ -865,17 +914,14 @@ namespace TTISDproject
             }
         }
 
-        private void ButtonPressed(object sender, KeyEventArgs e)
+        private void Window_OpenDebug(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.J)
             {
-
                 win2 = new SkeletonView();
                 win2.Show();
                 //this.Close();
             }
         }
-
-
     }
 }

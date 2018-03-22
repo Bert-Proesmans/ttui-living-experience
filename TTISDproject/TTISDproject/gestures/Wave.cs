@@ -9,6 +9,7 @@ using Emgu.CV;
 using static TTISDproject.gestures.GestureEventArgs;
 using Emgu.CV.Structure;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace TTISDproject.gestures
 {
@@ -105,7 +106,7 @@ namespace TTISDproject.gestures
             };
         }
 
-        public void Update(KinectSensor sensor, Skeleton skeleton)
+        public void Update(KinectSensor sensor, Skeleton skeleton, System.Windows.Point skel2DCenter)
         {
             GesturePartResult result = segments[currentSegmentIdx].Update(sensor, skeleton);
             if (result == GesturePartResult.Succeeded)
@@ -119,7 +120,7 @@ namespace TTISDproject.gestures
                 {
                     if (OnRecognized != null)
                     {
-                        OnRecognized(this, new GestureEventArgs(skeleton.TrackingId));
+                        OnRecognized(this, new GestureEventArgs(skeleton.TrackingId, skel2DCenter));
                         Reset();
                     }
                 }

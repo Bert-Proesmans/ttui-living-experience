@@ -228,10 +228,12 @@ namespace TTISDproject
                 {
                     // DBG
                     //new RHSWaveGesture(),
-                    //new JumpGesture(skel)
+                    new JumpGesture(skel)
                 };
 
-                result[0].OnRecognized += OnWaveRecognized;
+                //if (result.Length > 0)
+                //    result[0].OnRecognized += OnWaveRecognized;
+
 
                 /* Give the kalman filter some time to converge before firing events */
                 var kalman_wait_time = 1; // in seconds
@@ -239,7 +241,7 @@ namespace TTISDproject
                 dispatcherTimer.Tick += (sender, e) =>
                 {
                     Debug.WriteLine("Delayed subscription on JUMP");
-                    result[1].OnRecognized += OnJumpRecognized;
+                    result[0].OnRecognized += OnJumpRecognized;
                     dispatcherTimer.Stop();
                 };
                 dispatcherTimer.Interval = new TimeSpan(0, 0, kalman_wait_time);
@@ -298,7 +300,7 @@ namespace TTISDproject
                         IGesture[] gestures = RetrieveGesturesForSkel(skel.TrackingId, skel);
                         foreach (IGesture g in gestures)
                         {
-                            g.Update(this.sensor, skel);
+                            g.Update(this.sensor, skel, new Point());
                         }
 
                         RenderClippedEdges(skel, dc);
