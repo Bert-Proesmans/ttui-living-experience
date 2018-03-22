@@ -82,10 +82,9 @@ namespace TTISDproject.gestures
 
     class JumpGesture : IGesture
     {
-        readonly int WINDOW_SIZE = 20;
+        readonly int WINDOW_SIZE = 50;
 
         IJumpSegment[] segments;
-        GesturePartResult[] results;
 
         int currentSegmentIdx;
         int frameCount;
@@ -106,12 +105,6 @@ namespace TTISDproject.gestures
                 segOne,
                 // Down movement
                 segTwo
-            };
-
-            results = new GesturePartResult[]
-            {
-                GesturePartResult.Failed,
-                GesturePartResult.Failed,
             };
 
             SetupKalmanFilter(skel);
@@ -186,12 +179,7 @@ namespace TTISDproject.gestures
                 estimated
             };
 
-            for (int i = 0; i < segments.Length; ++i)
-            {
-                results[i] = segments[i].Update(sensor, skeleton, kal_results);
-            }
-
-            GesturePartResult result = results[currentSegmentIdx];
+            GesturePartResult result = segments[currentSegmentIdx].Update(sensor, skeleton, kal_results);
             if (result == GesturePartResult.Succeeded)
             {
                 if (currentSegmentIdx + 1 < segments.Length)
